@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Survival Torch</string>
+    <string name="action_settings">Settings</string>
+    <string name="button_full">Full</string>
+    <string name="button_sos">SOS</string>
+    <string name="button_sos_preset">SOS Preset</string>
+
+</resources>
