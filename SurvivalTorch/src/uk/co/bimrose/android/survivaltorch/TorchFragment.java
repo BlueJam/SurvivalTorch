@@ -39,6 +39,7 @@ public class TorchFragment extends SherlockFragment implements
 	int sosSpeed = 500;
 	
 	public static float lightLevel;
+	public static boolean isThereALightSensor;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent,
@@ -91,12 +92,9 @@ public class TorchFragment extends SherlockFragment implements
 		//If there isn't one, we reset the value and send the user a message
 		if(loopUntilLight){
 			// if there is no light sensor then clear the preference and post a message
-			if (!LightSensor.isThereALightSensor) {
+			if (!isThereALightSensor) {
 				prefs.edit().remove("loopuntillight").commit();
 				message.setText("Sorry, you don't have a light sensor");
-			}else{
-				LightSensor lS = new LightSensor();
-				message.setText(Float.toString(lightLevel));
 			}
 
 		}
