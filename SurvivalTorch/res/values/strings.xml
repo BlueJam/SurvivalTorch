@@ -3,8 +3,27 @@
 
     <string name="app_name">Survival Torch</string>
     <string name="action_settings">Settings</string>
-    <string name="button_full">Full</string>
+    <string name="button_full">On</string>
     <string name="button_sos">SOS</string>
     <string name="button_sos_preset">SOS Preset</string>
+    <string name="button_stop">Off</string>
+    <string name="settings">Settings</string>
+    <string name="loopforevertitle">Loop SOS</string>
+    <string name="loopforeversummary">Until it is stopped</string>
+    <string name="loopxtimestitle">Loop X</string>
+    <string name="loopxtimessummary">Send SOS X times</string>
+    <string name="sosspeedtitle">Speed</string>
+    <string name="sosspeedsummary">Of the SOS</string>
+    <string name="timebetweensostitle">SOS frequancy</string>
+    <string name="timelbetweensossummary">Repeat every X seconds</string>
+    <string name="loopuntillighttitle">Light sensor</string>
+    <string name="loopuntillightsummary">Stop at daybreak</string>
+    <string name="stoponlowbatterytitle">Save power</string>
+    <string name="stoponlowbatterysummary">Stop on low battery</string>
+    <string name="batterypercent">Battery alert</string>
+    <string name="batterypercentsummary">When to stop</string>
+    <string name="batterypercenttitle">Battery</string>
+    <string name="keepscreenontitle">Awake</string>
+    <string name="keepscreenonsummary">Keep the screen on</string>
 
 </resources>

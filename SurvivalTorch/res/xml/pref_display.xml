@@ -1,0 +1,60 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:empub="http://schemas.android.com/apk/res-auto" >
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:disableDependentsState="true"
+        android:key="loopforever"
+        android:summary="@string/loopforeversummary"
+        android:title="@string/loopforevertitle" />
+
+    <ListPreference
+        android:dependency="loopforever"
+        android:dialogTitle="@string/loopxtimestitle"
+        android:entries="@array/cycles"
+        android:entryValues="@array/cycles"
+        android:key="loopxtimes"
+        android:summary="@string/loopxtimessummary"
+        android:title="@string/loopxtimestitle" />
+    <ListPreference
+        android:dialogTitle="@string/timebetweensostitle"
+        android:entries="@array/seconds"
+        android:entryValues="@array/seconds"
+        android:key="timebetweenloops"
+        android:summary="@string/timelbetweensossummary"
+        android:title="@string/timebetweensostitle" />
+    <ListPreference
+        android:dialogTitle="@string/sosspeedtitle"
+        android:entries="@array/speed"
+        android:entryValues="@array/speednumbers"
+        android:key="sosspeed"
+        android:summary="@string/sosspeedsummary"
+        android:title="@string/sosspeedtitle" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="loopuntillight"
+        android:summary="@string/loopuntillightsummary"
+        android:title="@string/loopuntillighttitle" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="stoponlowbattery"
+        android:summary="@string/stoponlowbatterysummary"
+        android:title="@string/stoponlowbatterytitle" />
+
+    <ListPreference
+        android:dependency="stoponlowbattery"
+        android:dialogTitle="@string/batterypercent"
+        android:entries="@array/percentage"
+        android:entryValues="@array/cleanpercentage"
+        android:key="list"
+        android:summary="@string/batterypercentsummary"
+        android:title="@string/batterypercenttitle" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="keepscreenon"
+        android:summary="@string/keepscreenonsummary"
+        android:title="@string/keepscreenontitle" />
+
+</PreferenceScreen>
