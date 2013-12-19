@@ -1,12 +1,7 @@
 package uk.co.bimrose.android.survivaltorch;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.WindowManager;
@@ -16,13 +11,11 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-public class TorchActivity extends SherlockFragmentActivity implements
-		SensorEventListener {
+public class TorchActivity extends SherlockFragmentActivity implements LightFragment.DaytimeListener {
 
 	boolean keepScreenOn = false;
-	private SensorManager mSensorManager;
-	private Sensor mLight;
 	private TorchFragment torchFrag = null;
+	private LightFragment lightFrag = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -48,40 +41,15 @@ public class TorchActivity extends SherlockFragmentActivity implements
 					.add(R.id.torchfrag, torchFrag).commit();
 		}
 
-		// check for light sensor on the device
-		sensorCheck();
+		lightFrag = (LightFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.lightfrag);
 
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		if (TorchFragment.isThereALightSensor) {
-			mSensorManager.registerListener(this, mLight,
-					SensorManager.SENSOR_DELAY_NORMAL);
+		if (lightFrag == null) {
+			lightFrag = new LightFragment();
+			getSupportFragmentManager().beginTransaction()
+					.add(R.id.lightfrag, lightFrag).commit();
 		}
 
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-		if (TorchFragment.isThereALightSensor) {
-			mSensorManager.unregisterListener(this);
-		}
-
-	}
-
-	@Override
-	public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		// Don't think there is anything to do here
-	}
-
-	@Override
-	public void onSensorChanged(SensorEvent event) {
-		float lux = event.values[0];
-		torchFrag.message.setText(Float.toString(lux));
-		
 	}
 
 	@Override
@@ -101,17 +69,9 @@ public class TorchActivity extends SherlockFragmentActivity implements
 		return (super.onOptionsItemSelected(item));
 	}
 
-	private void sensorCheck() {
-		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-		if (mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null) {
-			// Yep, light sensor present
-			TorchFragment.isThereALightSensor = true;
-			mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-			mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-		} else {
-			// No light sensor
-			TorchFragment.isThereALightSensor = false;
-		}
+	@Override
+	public void onlightChanged(float lux) {
+		torchFrag.message.setText(Float.toString(lux));
 	}
 
 }
