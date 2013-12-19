@@ -22,12 +22,12 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	boolean keepScreenOn = false;
 	private SensorManager mSensorManager;
 	private Sensor mLight;
+	private TorchFragment torchFrag = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-
+		setContentView(R.layout.main);
 
 		// have they selected to keep the screen on?
 		SharedPreferences prefs = PreferenceManager
@@ -39,9 +39,13 @@ public class TorchActivity extends SherlockFragmentActivity implements
 					.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		}
 
-		if (getSupportFragmentManager().findFragmentById(android.R.id.content) == null) {
+		torchFrag = (TorchFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.torchfrag);
+
+		if (torchFrag == null) {
+			torchFrag = new TorchFragment();
 			getSupportFragmentManager().beginTransaction()
-					.add(android.R.id.content, new TorchFragment()).commit();
+					.add(R.id.torchfrag, torchFrag).commit();
 		}
 
 		// check for light sensor on the device
@@ -53,7 +57,8 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	protected void onResume() {
 		super.onResume();
 		if (TorchFragment.isThereALightSensor) {
-			mSensorManager.registerListener(this, mLight, SensorManager.SENSOR_DELAY_NORMAL);
+			mSensorManager.registerListener(this, mLight,
+					SensorManager.SENSOR_DELAY_NORMAL);
 		}
 
 	}
@@ -74,7 +79,9 @@ public class TorchActivity extends SherlockFragmentActivity implements
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-
+		float lux = event.values[0];
+		torchFrag.message.setText(Float.toString(lux));
+		
 	}
 
 	@Override

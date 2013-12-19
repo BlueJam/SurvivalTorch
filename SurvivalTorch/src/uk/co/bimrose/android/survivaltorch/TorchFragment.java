@@ -44,7 +44,7 @@ public class TorchFragment extends SherlockFragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent,
 			Bundle savedInstanceState) {
-		View result = inflater.inflate(R.layout.torchmain, parent, false);
+		View result = inflater.inflate(R.layout.torchfrag, parent, false);
 
 		buttonFull = (Button) result.findViewById(R.id.button_full);
 		buttonSos = (Button) result.findViewById(R.id.button_sos);
