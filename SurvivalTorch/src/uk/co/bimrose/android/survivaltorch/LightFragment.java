@@ -99,5 +99,4 @@ public class LightFragment extends SherlockFragment implements
         public void onlightChanged(float lux, int lightSensitivity);
     }
 
-
 }

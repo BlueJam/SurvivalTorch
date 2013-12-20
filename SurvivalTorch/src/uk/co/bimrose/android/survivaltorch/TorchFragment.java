@@ -24,6 +24,7 @@ public class TorchFragment extends SherlockFragment implements
 	Button buttonSosPreset;
 	Button buttonStop;
 	TextView message;
+	TextView batteryMessage;
 
 	Camera cam = null;
 	Parameters p = null;
@@ -34,7 +35,7 @@ public class TorchFragment extends SherlockFragment implements
 	int timeBetweenSignals = 5;
 	boolean stopOnLowBattery = true;
 	boolean keepScreenOn = false;
-	int list = 50;
+	int batteryPct = 50;
 	int loopXTimes = 1;
 	boolean stop = false;
 	int sosSpeed = 500;
@@ -43,6 +44,7 @@ public class TorchFragment extends SherlockFragment implements
 	public static boolean isThereALightSensor;
 	
 	AlertResetListener alertResetListener;
+	BatteryLowListener bLListener;
 	
 	@Override
     public void onAttach(Activity activity) {
@@ -54,6 +56,14 @@ public class TorchFragment extends SherlockFragment implements
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement AlertReset");
+        }
+        
+        //and the battery low listener as well
+        try {
+        	bLListener = (BatteryLowListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement BatteryLowListener");
         }
     }
 	
@@ -67,14 +77,13 @@ public class TorchFragment extends SherlockFragment implements
 		buttonSosPreset = (Button) result.findViewById(R.id.button_sos_preset);
 		buttonStop = (Button) result.findViewById(R.id.button_stop);
 		message = (TextView) result.findViewById(R.id.message);
+		batteryMessage = (TextView) result.findViewById(R.id.batterymessage);
 
 		buttonFull.setOnClickListener(this);
 		buttonSos.setOnClickListener(this);
 		buttonSosPreset.setOnClickListener(this);
 		buttonStop.setOnClickListener(this);
-
-		// getSherlockActivity().getSupportActionBar().setHomeButtonEnabled(true);
-
+		
 		return (result);
 	}
 
@@ -117,7 +126,8 @@ public class TorchFragment extends SherlockFragment implements
 		
 		stopOnLowBattery = Boolean.valueOf(prefs.getBoolean("stoponlowbattery",
 				true));
-		list = Integer.valueOf(prefs.getString("list", "5"));
+		batteryPct = Integer.valueOf(prefs.getString("batterypct", "50"));
+		batteryPct = 94;
 
 		keepScreenOn = Boolean.valueOf(prefs.getBoolean("keepscreenon", false));
 
@@ -235,7 +245,6 @@ public class TorchFragment extends SherlockFragment implements
 				}
 
 			}
-
 			return null;
 		}
 
@@ -264,8 +273,23 @@ public class TorchFragment extends SherlockFragment implements
 
 	}
 	
+	public void setBatteryMessage(int pct){
+		batteryMessage.setText(Integer.toString(pct));
+		if(stopOnLowBattery){
+			if(pct <= batteryPct){
+				stop = true;
+				bLListener.onLowBattery();
+			}
+		}
+	}
+	
 	public interface AlertResetListener {
 		public void lightAlertReset();
 	}
+	
+    // Container Activity must implement this interface
+    public interface BatteryLowListener {
+        public void onLowBattery();
+    }
 
 }

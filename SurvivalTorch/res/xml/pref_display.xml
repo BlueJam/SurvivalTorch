@@ -57,7 +57,7 @@
         android:dialogTitle="@string/batterypercent"
         android:entries="@array/percentage"
         android:entryValues="@array/cleanpercentage"
-        android:key="list"
+        android:key="batterypct"
         android:summary="@string/batterypercentsummary"
         android:title="@string/batterypercenttitle" />
 
@@ -66,5 +66,10 @@
         android:key="keepscreenon"
         android:summary="@string/keepscreenonsummary"
         android:title="@string/keepscreenontitle" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="forcetimeout"
+        android:summary="@string/forcetimeoutsummary"
+        android:title="@string/forcetimeouttitle" />
 
 </PreferenceScreen>

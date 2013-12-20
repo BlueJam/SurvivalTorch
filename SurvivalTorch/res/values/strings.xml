@@ -28,5 +28,7 @@
     <string name="batterypercenttitle">Battery</string>
     <string name="keepscreenontitle">Awake</string>
     <string name="keepscreenonsummary">Keep the screen on</string>
+    <string name="forcetimeouttitle">Force close</string>
+    <string name="forcetimeoutsummary">Let the screen timeout on low battery or daylight</string>
 
 </resources>
