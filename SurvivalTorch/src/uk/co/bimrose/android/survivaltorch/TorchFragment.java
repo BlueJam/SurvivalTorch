@@ -1,5 +1,6 @@
 package uk.co.bimrose.android.survivaltorch;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
@@ -35,12 +36,27 @@ public class TorchFragment extends SherlockFragment implements
 	boolean keepScreenOn = false;
 	int list = 50;
 	int loopXTimes = 1;
-	public static boolean stop = false;
+	boolean stop = false;
 	int sosSpeed = 500;
 	
 	public static float lightLevel;
 	public static boolean isThereALightSensor;
-
+	
+	AlertResetListener alertResetListener;
+	
+	@Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+        	alertResetListener = (AlertResetListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement AlertReset");
+        }
+    }
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent,
 			Bundle savedInstanceState) {
@@ -126,6 +142,7 @@ public class TorchFragment extends SherlockFragment implements
 	public void onClick(View view) {
 
 		stop = false;
+		alertResetListener.lightAlertReset();
 
 		switch (view.getId()) {
 		case R.id.button_full:
@@ -245,6 +262,10 @@ public class TorchFragment extends SherlockFragment implements
 			}
 		}
 
+	}
+	
+	public interface AlertResetListener {
+		public void lightAlertReset();
 	}
 
 }

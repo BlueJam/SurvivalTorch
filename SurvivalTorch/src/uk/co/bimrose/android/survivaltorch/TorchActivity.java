@@ -2,6 +2,9 @@ package uk.co.bimrose.android.survivaltorch;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.WindowManager;
@@ -11,11 +14,13 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
-public class TorchActivity extends SherlockFragmentActivity implements LightFragment.DaytimeListener {
+public class TorchActivity extends SherlockFragmentActivity implements
+		LightFragment.DaytimeListener, TorchFragment.AlertResetListener {
 
 	boolean keepScreenOn = false;
 	private TorchFragment torchFrag = null;
 	private LightFragment lightFrag = null;
+	private boolean soundAlert = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -62,7 +67,7 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.prefs:
-			TorchFragment.stop = true;
+			torchFrag.stop = true;
 			startActivity(new Intent(this, Preferences.class));
 			return (true);
 		}
@@ -70,8 +75,24 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 	}
 
 	@Override
-	public void onlightChanged(float lux) {
+	public void onlightChanged(float lux, int lightSensitivity) {
 		torchFrag.message.setText(Float.toString(lux));
+		if (lux >= lightSensitivity) {
+			torchFrag.stop = true;
+			Uri notification = RingtoneManager
+					.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+			if (soundAlert) {
+				Ringtone r = RingtoneManager.getRingtone(
+						getApplicationContext(), notification);
+				r.play();
+			}
+			soundAlert = false;
+		}
+	}
+
+	@Override
+	public void lightAlertReset() {
+		soundAlert = true;
 	}
 
 }

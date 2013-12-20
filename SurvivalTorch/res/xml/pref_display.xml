@@ -36,6 +36,16 @@
         android:key="loopuntillight"
         android:summary="@string/loopuntillightsummary"
         android:title="@string/loopuntillighttitle" />
+
+    <ListPreference
+        android:dependency="loopuntillight"
+        android:dialogTitle="@string/lightsensitivitydialogtitle"
+        android:entries="@array/lightsensitivity"
+        android:entryValues="@array/lightsensitivitynumbers"
+        android:key="lightsensitivity"
+        android:summary="@string/lightsensitivitysummary"
+        android:title="@string/lightsensitivitytitle" />
+
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="stoponlowbattery"

@@ -16,8 +16,11 @@
     <string name="sosspeedsummary">Of the SOS</string>
     <string name="timebetweensostitle">SOS frequancy</string>
     <string name="timelbetweensossummary">Repeat every X seconds</string>
-    <string name="loopuntillighttitle">Light sensor</string>
-    <string name="loopuntillightsummary">Stop at daybreak</string>
+    <string name="loopuntillighttitle">Stop sending</string>
+    <string name="loopuntillightsummary">As it gets light</string>
+    <string name="lightsensitivitydialogtitle">Light sensitivity in Lux</string>
+    <string name="lightsensitivitytitle">Set the sensitivity</string>
+    <string name="lightsensitivitysummary">Of the light sensor</string>
     <string name="stoponlowbatterytitle">Save power</string>
     <string name="stoponlowbatterysummary">Stop on low battery</string>
     <string name="batterypercent">Battery alert</string>
