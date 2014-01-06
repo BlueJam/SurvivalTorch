@@ -39,9 +39,10 @@ public class TorchFragment extends SherlockFragment implements
 	int loopXTimes = 1;
 	boolean stop = false;
 	int sosSpeed = 500;
+	boolean isThereALightSensor;
 	
 	public static float lightLevel;
-	public static boolean isThereALightSensor;
+	
 	
 	AlertResetListener alertResetListener;
 	BatteryLowListener bLListener;
@@ -127,7 +128,7 @@ public class TorchFragment extends SherlockFragment implements
 		stopOnLowBattery = Boolean.valueOf(prefs.getBoolean("stoponlowbattery",
 				true));
 		batteryPct = Integer.valueOf(prefs.getString("batterypct", "50"));
-		batteryPct = 94;
+		//batteryPct = 94;
 
 		keepScreenOn = Boolean.valueOf(prefs.getBoolean("keepscreenon", false));
 

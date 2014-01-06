@@ -16,14 +16,18 @@ import com.actionbarsherlock.view.MenuItem;
 
 public class TorchActivity extends SherlockFragmentActivity implements
 		LightFragment.DaytimeListener, TorchFragment.BatteryLowListener,
-		TorchFragment.AlertResetListener, BatteryFragment.BatteryChargeListener {
+		TorchFragment.AlertResetListener,
+		BatteryFragment.BatteryChargeListener,
+		LightFragment.IsThereALightSensor, LightFragment.GetIsThereALightSensor {
 
 	boolean keepScreenOn = false;
+	private boolean isThereALightSensor = false;
 	private TorchFragment torchFrag = null;
 	private LightFragment lightFrag = null;
 	private BatteryFragment batteryFrag = null;
-	//used to stop the alert repeating when the light resonates above and below the
-	//threshold that has been set
+	// used to stop the alert repeating when the light resonates above and below
+	// the
+	// threshold that has been set
 	private boolean soundAlert = false;
 
 	@Override
@@ -89,7 +93,7 @@ public class TorchActivity extends SherlockFragmentActivity implements
 
 	@Override
 	public void onlightChanged(float lux, int lightSensitivity) {
-		//checks if the light level is above or equal to the threshold set
+		// checks if the light level is above or equal to the threshold set
 		torchFrag.message.setText(Float.toString(lux));
 		if (lux >= lightSensitivity) {
 			torchFrag.stop = true;
@@ -112,20 +116,22 @@ public class TorchActivity extends SherlockFragmentActivity implements
 
 	public void enableScreenTimeout() {
 		if (keepScreenOn) {
-		// sets the screen to be able to timeout
-		getWindow().clearFlags(
-				android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+			// sets the screen to be able to timeout
+			getWindow()
+					.clearFlags(
+							android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		}
 	}
 
 	@Override
 	public void lightAlertReset() {
-		//lets the alert be used again, called by the TorchFragment when one of it's buttons is clicked
+		// lets the alert be used again, called by the TorchFragment when one of
+		// it's buttons is clicked
 		soundAlert = true;
 	}
 
 	@Override
-	//sets the battery percentage
+	// sets the battery percentage
 	public void batteryCharge(int pct) {
 		torchFrag.setBatteryMessage(pct);
 	}
@@ -135,6 +141,16 @@ public class TorchActivity extends SherlockFragmentActivity implements
 		enableScreenTimeout();
 		// plays notification
 		playNotification();
+	}
+
+	@Override
+	public void sensorCheck(boolean isThereALightSensor) {
+		torchFrag.isThereALightSensor = isThereALightSensor;
+	}
+
+	@Override
+	public boolean getIsThereALightSensor() {
+		return torchFrag.isThereALightSensor;
 	}
 
 }

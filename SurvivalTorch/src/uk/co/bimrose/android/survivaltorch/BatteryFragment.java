@@ -51,6 +51,8 @@ public class BatteryFragment extends SherlockFragment {
 	}
 
 	BroadcastReceiver onBattery = new BroadcastReceiver() {
+		//Receives a broadcast whenever the battery level drops
+		//Then sends a message to the hosting Activity with that %age
 		public void onReceive(Context context, Intent intent) {
 			int pct = 100 * intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 1)
 					/ intent.getIntExtra(BatteryManager.EXTRA_SCALE, 1);
