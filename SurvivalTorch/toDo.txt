@@ -2,4 +2,15 @@ sorting out errors with asynchtask - still possible to hit 'stop' and make the l
 
 keeps running even when the screen is off
 
+Merge the light preferences:
+
+Stop sending SOS
+As it gets light?
+How light do you want it to be when the SOS stops being sent:
+Dark - 40 lux
+.
+.
+Light - 640 lux
+Leave on all the time
+
 

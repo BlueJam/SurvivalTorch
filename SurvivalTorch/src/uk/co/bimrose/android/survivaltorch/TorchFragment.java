@@ -35,7 +35,6 @@ public class TorchFragment extends SherlockFragment implements
 	boolean keepScreenOn = false;
 	int batteryPct = 50;
 	int loopXTimes = 1;
-	boolean stop = false;
 	int sosSpeed = 500;
 	boolean isThereALightSensor;
 	boolean running = false;
@@ -174,7 +173,6 @@ public class TorchFragment extends SherlockFragment implements
 	public void cancelSosAsynchTask() {
 		if (running) {
 			sosLight.cancel(true);
-			stop = true;
 		}
 	}
 
@@ -226,14 +224,12 @@ public class TorchFragment extends SherlockFragment implements
 				turnOffFlash();
 			}
 
-			// a 'true' value pops it out of the loops
-			stop = false;
-
 			if (single) {
 				sos();
 			} else {
 				if (loopXTimes > 0) {
-					for (int i = 0; (i < loopXTimes) && !stop; i++) {
+					for (int i = 0; i < loopXTimes; i++) {
+						if (isCancelled()) break;
 						sos();
 					}
 				}
@@ -244,7 +240,8 @@ public class TorchFragment extends SherlockFragment implements
 		private void sos() {
 			try {
 				// dot dot dot, dash dash dash, dot dot dot
-				for (int i = 0; i < 9 && !stop; i++) {
+				for (int i = 0; i < 9; i++) {
+					if (isCancelled()) break;
 					int flashOn = sosSpeed;
 					int sleepTime = sosSpeed;
 					if (i > 2 && i < 6) {
@@ -276,7 +273,6 @@ public class TorchFragment extends SherlockFragment implements
 	public void setBatteryMessage(int pct) {
 		batteryMessage.setText(Integer.toString(pct));
 		if (pct <= batteryPct) {
-			stop = true;
 			cancelSosAsynchTask();
 			bLListener.onLowBattery();
 		}
