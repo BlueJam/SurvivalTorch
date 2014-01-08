@@ -40,34 +40,36 @@ public class TorchFragment extends SherlockFragment implements
 	boolean stop = false;
 	int sosSpeed = 500;
 	boolean isThereALightSensor;
-	
+	boolean running = false;
+
+	private Sos sosLight;
+
 	public static float lightLevel;
-	
-	
+
 	AlertResetListener alertResetListener;
 	BatteryLowListener bLListener;
-	
+
 	@Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        // This makes sure that the container activity has implemented
-        // the callback interface. If not, it throws an exception
-        try {
-        	alertResetListener = (AlertResetListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement AlertReset");
-        }
-        
-        //and the battery low listener as well
-        try {
-        	bLListener = (BatteryLowListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement BatteryLowListener");
-        }
-    }
-	
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		// This makes sure that the container activity has implemented
+		// the callback interface. If not, it throws an exception
+		try {
+			alertResetListener = (AlertResetListener) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString()
+					+ " must implement AlertReset");
+		}
+
+		// and the battery low listener as well
+		try {
+			bLListener = (BatteryLowListener) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString()
+					+ " must implement BatteryLowListener");
+		}
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent,
 			Bundle savedInstanceState) {
@@ -84,7 +86,7 @@ public class TorchFragment extends SherlockFragment implements
 		buttonSos.setOnClickListener(this);
 		buttonSosPreset.setOnClickListener(this);
 		buttonStop.setOnClickListener(this);
-		
+
 		return (result);
 	}
 
@@ -97,10 +99,6 @@ public class TorchFragment extends SherlockFragment implements
 	@Override
 	public void onResume() {
 		super.onResume();
-		
-		if (isFlashOn) {
-			turnOnFlash();
-		}
 
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(getActivity());
@@ -110,28 +108,21 @@ public class TorchFragment extends SherlockFragment implements
 		timeBetweenSignals = Integer.valueOf(prefs.getString(
 				"timebetweenloops", "5"));
 		sosSpeed = Integer.valueOf(prefs.getString("sosspeed", "500"));
-		
+
 		message.setText("");
 		loopUntilLight = Boolean.valueOf(prefs.getBoolean("loopuntillight",
 				false));
-		//If the light sensor has been checked then we need to check if we have one
-		//If there isn't one, we reset the value and send the user a message
-		if(loopUntilLight){
-			// if there is no light sensor then clear the preference and post a message
-			if (!isThereALightSensor) {
-				prefs.edit().remove("loopuntillight").commit();
-				message.setText("Sorry, you don't have a light sensor");
-			}
 
+		if (loopUntilLight) {
+			if (!isThereALightSensor) {
+				message.setText("Sorry, you don't have a light sensor");
+				prefs.edit().remove("loopuntillight").commit();
+			}
 		}
-		
+
 		stopOnLowBattery = Boolean.valueOf(prefs.getBoolean("stoponlowbattery",
 				true));
 		batteryPct = Integer.valueOf(prefs.getString("batterypct", "50"));
-		//batteryPct = 94;
-
-		keepScreenOn = Boolean.valueOf(prefs.getBoolean("keepscreenon", false));
-
 	}
 
 	@Override
@@ -152,8 +143,7 @@ public class TorchFragment extends SherlockFragment implements
 	@Override
 	public void onClick(View view) {
 
-		stop = false;
-		alertResetListener.lightAlertReset();
+		cancelSosAsynchTask();
 
 		switch (view.getId()) {
 		case R.id.button_full:
@@ -165,20 +155,32 @@ public class TorchFragment extends SherlockFragment implements
 			break;
 		case R.id.button_sos:
 			single = true;
-			new Sos().execute();
+			initialiseSos();
 			break;
 		case R.id.button_sos_preset:
 			single = false;
-			new Sos().execute();
+			initialiseSos();
 			break;
 		case R.id.button_stop:
 			turnOffFlash();
-			stop = true;
 			break;
 		default:
 			throw new RuntimeException("Unknow button ID");
 		}
 
+	}
+
+	public void initialiseSos() {
+		alertResetListener.alertReset();
+		running = true;
+		sosLight = (Sos) new Sos().execute();
+	}
+
+	public void cancelSosAsynchTask() {
+		if (running) {
+			sosLight.cancel(true);
+			stop = true;
+		}
 	}
 
 	// get camera parameters
@@ -202,13 +204,13 @@ public class TorchFragment extends SherlockFragment implements
 			p = cam.getParameters();
 			p.setFlashMode(Parameters.FLASH_MODE_TORCH);
 			cam.setParameters(p);
-			cam.startPreview();
 			isFlashOn = true;
+			cam.startPreview();
 		}
 
 	}
 
-	private void turnOffFlash() {
+	public void turnOffFlash() {
 		if (isFlashOn) {
 			if (cam == null || p == null) {
 				return;
@@ -229,6 +231,9 @@ public class TorchFragment extends SherlockFragment implements
 				turnOffFlash();
 			}
 
+			// a 'true' value pops it out of the loops
+			stop = false;
+
 			if (single) {
 				sos();
 			} else {
@@ -237,14 +242,10 @@ public class TorchFragment extends SherlockFragment implements
 						sos();
 					}
 				} else if (loopXTimes > 0) {
-					for (int i = 0; i < loopXTimes; i++) {
+					for (int i = 0; (i < loopXTimes) && !stop; i++) {
 						sos();
-						if (stop) {
-							break;
-						}
 					}
 				}
-
 			}
 			return null;
 		}
@@ -252,7 +253,7 @@ public class TorchFragment extends SherlockFragment implements
 		private void sos() {
 			try {
 				// dot dot dot, dash dash dash, dot dot dot
-				for (int i = 0; i < 9; i++) {
+				for (int i = 0; i < 9 && !stop; i++) {
 					int flashOn = sosSpeed;
 					int sleepTime = sosSpeed;
 					if (i > 2 && i < 6) {
@@ -262,9 +263,6 @@ public class TorchFragment extends SherlockFragment implements
 					Thread.sleep(flashOn);
 					turnOffFlash();
 					Thread.sleep(sleepTime);
-					if (stop) {
-						break;
-					}
 				}
 				Thread.sleep(timeBetweenSignals * 1000);
 			} catch (InterruptedException e) {
@@ -272,25 +270,31 @@ public class TorchFragment extends SherlockFragment implements
 			}
 		}
 
+		protected void onPostExecute(Void args) {
+			running = false;
+			turnOffFlash();
+		}
+
 	}
-	
-	public void setBatteryMessage(int pct){
+
+	public void setBatteryMessage(int pct) {
 		batteryMessage.setText(Integer.toString(pct));
-		if(stopOnLowBattery){
-			if(pct <= batteryPct){
+		if (stopOnLowBattery) {
+			if (pct <= batteryPct) {
 				stop = true;
+				cancelSosAsynchTask();
 				bLListener.onLowBattery();
 			}
 		}
 	}
-	
+
 	public interface AlertResetListener {
-		public void lightAlertReset();
+		public void alertReset();
 	}
-	
-    // Container Activity must implement this interface
-    public interface BatteryLowListener {
-        public void onLowBattery();
-    }
+
+	// Container Activity must implement this interface
+	public interface BatteryLowListener {
+		public void onLowBattery();
+	}
 
 }

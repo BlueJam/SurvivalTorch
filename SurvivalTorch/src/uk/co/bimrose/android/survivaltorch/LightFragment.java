@@ -22,10 +22,12 @@ public class LightFragment extends SherlockFragment implements
 	private Sensor mLight;
 	Context mContext;
 	boolean isThereALightSensor;
+	String loopUntilLight;
+	
+	SharedPreferences prefsEdit;
 
 	DaytimeListener dTListener;
-	IsThereALightSensor lSListener;
-	GetIsThereALightSensor gLSListener;
+	LightSensorListener lSListener;
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -38,19 +40,12 @@ public class LightFragment extends SherlockFragment implements
 			throw new ClassCastException(activity.toString()
 					+ " must implement DaytimeListener");
 		}
-
+		
 		try {
-			lSListener = (IsThereALightSensor) activity;
+			lSListener = (LightSensorListener) activity;
 		} catch (ClassCastException e) {
 			throw new ClassCastException(activity.toString()
-					+ " must implement IsThereALightSensor");
-		}
-
-		try {
-			gLSListener = (GetIsThereALightSensor) activity;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString()
-					+ " must implement GetIsThereALightSensor");
+					+ " must implement LightSensorListener");
 		}
 	}
 
@@ -67,7 +62,7 @@ public class LightFragment extends SherlockFragment implements
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (gLSListener.getIsThereALightSensor()) {
+		if(isThereALightSensor){
 			mSensorManager.registerListener(this, mLight,
 					SensorManager.SENSOR_DELAY_NORMAL);
 		}
@@ -76,7 +71,7 @@ public class LightFragment extends SherlockFragment implements
 	@Override
 	public void onPause() {
 		super.onPause();
-		if (gLSListener.getIsThereALightSensor()) {
+		if(isThereALightSensor){
 			mSensorManager.unregisterListener(this);
 		}
 	}
@@ -101,32 +96,41 @@ public class LightFragment extends SherlockFragment implements
 	}
 
 	public void sensorCheck() {
-
+		//used to edit a preference
+		prefsEdit = getActivity().getSharedPreferences(
+				"uk.co.bimrose.android.survivaltorch", Context.MODE_PRIVATE);
+		loopUntilLight = "uk.co.bimrose.android.survivaltorch.loopUntilLight";
+		
 		mSensorManager = (SensorManager) getActivity().getSystemService(
 				Context.SENSOR_SERVICE);
+		
 		if (mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null) {
 			// Yep, light sensor present
-			lSListener.sensorCheck(true);
+			isThereALightSensor = true;
+			updateLightSensorStatus();
 			mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 		} else {
 			// No light sensor
-			lSListener.sensorCheck(false);
+			isThereALightSensor = false;
+			updateLightSensorStatus();
 		}
 	}
-
+	
+	public void updateLightSensorStatus(){
+		//used to edit the loopUntilLight preference
+		prefsEdit.edit().putBoolean(loopUntilLight, isThereALightSensor).commit();
+		//let the TorchFragment know there is a light sensor
+		lSListener.lightSensorCheck(isThereALightSensor);
+	}
+	
 	// Container Activity must implement this interface
 	public interface DaytimeListener {
 		public void onlightChanged(float lux, int lightSensitivity);
 	}
-
+	
 	// Container Activity must implement this interface
-	public interface IsThereALightSensor {
-		public void sensorCheck(boolean isThereALightSensor);
-	}
-
-	// Container Activity must implement this interface
-	public interface GetIsThereALightSensor {
-		public boolean getIsThereALightSensor();
+	public interface LightSensorListener {
+		public void lightSensorCheck(boolean isThereALightSensor);
 	}
 
 	/**

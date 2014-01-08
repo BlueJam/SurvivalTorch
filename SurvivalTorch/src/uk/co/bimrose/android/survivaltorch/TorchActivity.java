@@ -18,10 +18,9 @@ public class TorchActivity extends SherlockFragmentActivity implements
 		LightFragment.DaytimeListener, TorchFragment.BatteryLowListener,
 		TorchFragment.AlertResetListener,
 		BatteryFragment.BatteryChargeListener,
-		LightFragment.IsThereALightSensor, LightFragment.GetIsThereALightSensor {
+		LightFragment.LightSensorListener {
 
 	boolean keepScreenOn = false;
-	private boolean isThereALightSensor = false;
 	private TorchFragment torchFrag = null;
 	private LightFragment lightFrag = null;
 	private BatteryFragment batteryFrag = null;
@@ -84,8 +83,12 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.prefs:
-			torchFrag.stop = true;
-			startActivity(new Intent(this, Preferences.class));
+			cancelSos();
+			//let the preferences know if the light sensor is present
+			//if it is then don't show the option
+			Intent i = new Intent(this, Preferences.class);
+			i.putExtra("lightSensor", torchFrag.isThereALightSensor);
+			startActivity(i);
 			return (true);
 		}
 		return (super.onOptionsItemSelected(item));
@@ -95,13 +98,18 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	public void onlightChanged(float lux, int lightSensitivity) {
 		// checks if the light level is above or equal to the threshold set
 		torchFrag.message.setText(Float.toString(lux));
-		if (lux >= lightSensitivity) {
-			torchFrag.stop = true;
-			playNotification();
-			// stops the alert playing over and over as the lighting changes
-			soundAlert = false;
-			enableScreenTimeout();
+		if (torchFrag.loopUntilLight) {
+			if (lux >= lightSensitivity) {
+				cancelSos();
+				playNotification();
+				enableScreenTimeout();
+			}
 		}
+	}
+	
+	public void cancelSos(){
+		torchFrag.cancelSosAsynchTask();
+		torchFrag.turnOffFlash();
 	}
 
 	public void playNotification() {
@@ -111,6 +119,8 @@ public class TorchActivity extends SherlockFragmentActivity implements
 			Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
 					notification);
 			r.play();
+			// stops the alert playing over and over as the lighting / battery charge changes
+			soundAlert = false;
 		}
 	}
 
@@ -124,7 +134,7 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	}
 
 	@Override
-	public void lightAlertReset() {
+	public void alertReset() {
 		// lets the alert be used again, called by the TorchFragment when one of
 		// it's buttons is clicked
 		soundAlert = true;
@@ -139,18 +149,13 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	@Override
 	public void onLowBattery() {
 		enableScreenTimeout();
-		// plays notification
+		cancelSos();
 		playNotification();
 	}
 
 	@Override
-	public void sensorCheck(boolean isThereALightSensor) {
+	public void lightSensorCheck(boolean isThereALightSensor) {
 		torchFrag.isThereALightSensor = isThereALightSensor;
-	}
-
-	@Override
-	public boolean getIsThereALightSensor() {
-		return torchFrag.isThereALightSensor;
 	}
 
 }

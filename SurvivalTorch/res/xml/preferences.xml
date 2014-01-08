@@ -67,6 +67,7 @@
         android:summary="@string/keepscreenonsummary"
         android:title="@string/keepscreenontitle" />
     <CheckBoxPreference
+        android:dependency="keepscreenon"
         android:defaultValue="false"
         android:key="forcetimeout"
         android:summary="@string/forcetimeoutsummary"
