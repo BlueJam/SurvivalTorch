@@ -165,7 +165,7 @@ public class TorchFragment extends SherlockFragment implements
 			turnOffFlash();
 			break;
 		default:
-			throw new RuntimeException("Unknow button ID");
+			throw new RuntimeException("Unknown button ID");
 		}
 
 	}
@@ -272,6 +272,11 @@ public class TorchFragment extends SherlockFragment implements
 
 		protected void onPostExecute(Void args) {
 			running = false;
+			turnOffFlash();
+		}
+
+		@Override
+		protected void onCancelled() {
 			turnOffFlash();
 		}
 
