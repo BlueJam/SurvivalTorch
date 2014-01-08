@@ -1,18 +1,10 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:empub="http://schemas.android.com/apk/res-auto" >
 
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:disableDependentsState="true"
-        android:key="loopforever"
-        android:summary="@string/loopforeversummary"
-        android:title="@string/loopforevertitle" />
-
     <ListPreference
-        android:dependency="loopforever"
         android:dialogTitle="@string/loopxtimestitle"
         android:entries="@array/cycles"
-        android:entryValues="@array/cycles"
+        android:entryValues="@array/mycycles"
         android:key="loopxtimes"
         android:summary="@string/loopxtimessummary"
         android:title="@string/loopxtimestitle" />
@@ -46,14 +38,7 @@
         android:summary="@string/lightsensitivitysummary"
         android:title="@string/lightsensitivitytitle" />
 
-    <CheckBoxPreference
-        android:defaultValue="true"
-        android:key="stoponlowbattery"
-        android:summary="@string/stoponlowbatterysummary"
-        android:title="@string/stoponlowbatterytitle" />
-
     <ListPreference
-        android:dependency="stoponlowbattery"
         android:dialogTitle="@string/batterypercent"
         android:entries="@array/percentage"
         android:entryValues="@array/cleanpercentage"

@@ -2,16 +2,7 @@
 <resources>
 
     <string-array name="percentage">
-        <item>100%</item>
-        <item>99%</item>
-        <item>98%</item>
-        <item>97%</item>
-        <item>96%</item>
         <item>95%</item>
-        <item>94%</item>
-        <item>93%</item>
-        <item>92%</item>
-        <item>91%</item>
         <item>90%</item>
         <item>80%</item>
         <item>70%</item>
@@ -21,18 +12,10 @@
         <item>30%</item>
         <item>20%</item>
         <item>10%</item>
+        <item>Leave on</item>
     </string-array>
     <string-array name="cleanpercentage">
-        <item>100</item>
-        <item>99</item>
-        <item>98</item>
-        <item>97</item>
-        <item>96</item>
         <item>95</item>
-        <item>94</item>
-        <item>93</item>
-        <item>92</item>
-        <item>91</item>
         <item>90</item>
         <item>80</item>
         <item>70</item>
@@ -42,6 +25,7 @@
         <item>30</item>
         <item>20</item>
         <item>10</item>
+        <item>0</item>
     </string-array>
     <string-array name="speed">
         <item>Very Slow</item>
@@ -64,6 +48,16 @@
         <item>20</item>
         <item>50</item>
         <item>100</item>
+        <item>Loop Forever</item>
+    </string-array>
+    <string-array name="mycycles">
+        <item>1</item>
+        <item>5</item>
+        <item>10</item>
+        <item>20</item>
+        <item>50</item>
+        <item>100</item>
+        <item>100000</item>
     </string-array>
     <string-array name="seconds">
         <item>1</item>
@@ -93,7 +87,7 @@
         <item>320 lux</item>
         <item>Light - 640 lux</item>
     </string-array>
-        <string-array name="lightsensitivitynumbers">
+    <string-array name="lightsensitivitynumbers">
         <item>40</item>
         <item>90</item>
         <item>160</item>

@@ -1,0 +1,5 @@
+sorting out errors with asynchtask - still possible to hit 'stop' and make the light stay on when it's signaling, very hard and specific timing though - fixed 'I think!!!'
+
+keeps running even when the screen is off
+
+

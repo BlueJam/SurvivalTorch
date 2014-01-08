@@ -21,11 +21,9 @@
     <string name="lightsensitivitydialogtitle">Light sensitivity in Lux</string>
     <string name="lightsensitivitytitle">Set the sensitivity</string>
     <string name="lightsensitivitysummary">Of the light sensor</string>
-    <string name="stoponlowbatterytitle">Save power</string>
-    <string name="stoponlowbatterysummary">Stop on low battery</string>
-    <string name="batterypercent">Battery alert</string>
-    <string name="batterypercentsummary">When to stop</string>
-    <string name="batterypercenttitle">Battery</string>
+    <string name="batterypercent">Stop sending SOS when battery reaches:</string>
+    <string name="batterypercentsummary">Stop sending SOS on low battery</string>
+    <string name="batterypercenttitle">Save Power</string>
     <string name="keepscreenontitle">Awake</string>
     <string name="keepscreenonsummary">Keep the screen on</string>
     <string name="forcetimeouttitle">Force close</string>

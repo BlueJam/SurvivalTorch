@@ -29,11 +29,9 @@ public class TorchFragment extends SherlockFragment implements
 	Camera cam = null;
 	Parameters p = null;
 	boolean isFlashOn = false;
-	boolean loopForever = false;
 	boolean single = true;
 	boolean loopUntilLight = false;
 	int timeBetweenSignals = 5;
-	boolean stopOnLowBattery = true;
 	boolean keepScreenOn = false;
 	int batteryPct = 50;
 	int loopXTimes = 1;
@@ -103,7 +101,6 @@ public class TorchFragment extends SherlockFragment implements
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(getActivity());
 
-		loopForever = Boolean.valueOf(prefs.getBoolean("loopforever", false));
 		loopXTimes = Integer.valueOf(prefs.getString("loopxtimes", "1"));
 		timeBetweenSignals = Integer.valueOf(prefs.getString(
 				"timebetweenloops", "5"));
@@ -120,8 +117,6 @@ public class TorchFragment extends SherlockFragment implements
 			}
 		}
 
-		stopOnLowBattery = Boolean.valueOf(prefs.getBoolean("stoponlowbattery",
-				true));
 		batteryPct = Integer.valueOf(prefs.getString("batterypct", "50"));
 	}
 
@@ -237,11 +232,7 @@ public class TorchFragment extends SherlockFragment implements
 			if (single) {
 				sos();
 			} else {
-				if (loopForever) {
-					while (!stop) {
-						sos();
-					}
-				} else if (loopXTimes > 0) {
+				if (loopXTimes > 0) {
 					for (int i = 0; (i < loopXTimes) && !stop; i++) {
 						sos();
 					}
@@ -284,12 +275,10 @@ public class TorchFragment extends SherlockFragment implements
 
 	public void setBatteryMessage(int pct) {
 		batteryMessage.setText(Integer.toString(pct));
-		if (stopOnLowBattery) {
-			if (pct <= batteryPct) {
-				stop = true;
-				cancelSosAsynchTask();
-				bLListener.onLowBattery();
-			}
+		if (pct <= batteryPct) {
+			stop = true;
+			cancelSosAsynchTask();
+			bLListener.onLowBattery();
 		}
 	}
 
