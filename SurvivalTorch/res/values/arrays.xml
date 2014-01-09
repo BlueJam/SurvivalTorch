@@ -2,7 +2,6 @@
 <resources>
 
     <string-array name="percentage">
-        <item>95%</item>
         <item>90%</item>
         <item>80%</item>
         <item>70%</item>
@@ -15,7 +14,6 @@
         <item>Leave on</item>
     </string-array>
     <string-array name="cleanpercentage">
-        <item>95</item>
         <item>90</item>
         <item>80</item>
         <item>70</item>
@@ -86,6 +84,7 @@
         <item>225 lux</item>
         <item>320 lux</item>
         <item>Light - 640 lux</item>
+        <item>Leave on during daylight</item>
     </string-array>
     <string-array name="lightsensitivitynumbers">
         <item>40</item>
@@ -94,6 +93,7 @@
         <item>225</item>
         <item>320</item>
         <item>640</item>
+        <item>1000000</item>
     </string-array>
 
 </resources>

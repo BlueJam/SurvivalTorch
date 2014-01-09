@@ -22,22 +22,6 @@
         android:key="sosspeed"
         android:summary="@string/sosspeedsummary"
         android:title="@string/sosspeedtitle" />
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="loopuntillight"
-        android:summary="@string/loopuntillightsummary"
-        android:title="@string/loopuntillighttitle" />
-
-    <ListPreference
-        android:dependency="loopuntillight"
-        android:dialogTitle="@string/lightsensitivitydialogtitle"
-        android:entries="@array/lightsensitivity"
-        android:entryValues="@array/lightsensitivitynumbers"
-        android:key="lightsensitivity"
-        android:summary="@string/lightsensitivitysummary"
-        android:title="@string/lightsensitivitytitle" />
-
     <ListPreference
         android:dialogTitle="@string/batterypercent"
         android:entries="@array/percentage"
@@ -45,6 +29,13 @@
         android:key="batterypct"
         android:summary="@string/batterypercentsummary"
         android:title="@string/batterypercenttitle" />
+    <ListPreference
+        android:dialogTitle="@string/lightsensitivitydialogtitle"
+        android:entries="@array/lightsensitivity"
+        android:entryValues="@array/lightsensitivitynumbers"
+        android:key="lightsensitivity"
+        android:summary="@string/lightsensitivitysummary"
+        android:title="@string/lightsensitivitytitle" />
 
     <CheckBoxPreference
         android:defaultValue="false"
@@ -52,8 +43,8 @@
         android:summary="@string/keepscreenonsummary"
         android:title="@string/keepscreenontitle" />
     <CheckBoxPreference
-        android:dependency="keepscreenon"
         android:defaultValue="false"
+        android:dependency="keepscreenon"
         android:key="forcetimeout"
         android:summary="@string/forcetimeoutsummary"
         android:title="@string/forcetimeouttitle" />

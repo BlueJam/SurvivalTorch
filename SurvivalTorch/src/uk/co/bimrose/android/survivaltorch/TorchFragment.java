@@ -30,7 +30,7 @@ public class TorchFragment extends SherlockFragment implements
 	Parameters p = null;
 	boolean isFlashOn = false;
 	boolean single = true;
-	boolean loopUntilLight = false;
+	int lightSensitivity = 1000000;
 	int timeBetweenSignals = 5;
 	boolean keepScreenOn = false;
 	int batteryPct = 50;
@@ -106,13 +106,12 @@ public class TorchFragment extends SherlockFragment implements
 		sosSpeed = Integer.valueOf(prefs.getString("sosspeed", "500"));
 
 		message.setText("");
-		loopUntilLight = Boolean.valueOf(prefs.getBoolean("loopuntillight",
-				false));
+		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity", "1000000"));
 
-		if (loopUntilLight) {
+		if (lightSensitivity<1000) {
 			if (!isThereALightSensor) {
 				message.setText("Sorry, you don't have a light sensor");
-				prefs.edit().remove("loopuntillight").commit();
+				prefs.edit().remove("lightSensitivity").commit();
 			}
 		}
 

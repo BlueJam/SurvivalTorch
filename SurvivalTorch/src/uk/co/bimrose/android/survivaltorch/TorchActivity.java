@@ -98,7 +98,7 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	public void onlightChanged(float lux, int lightSensitivity) {
 		// checks if the light level is above or equal to the threshold set
 		torchFrag.message.setText(Float.toString(lux));
-		if (torchFrag.loopUntilLight) {
+		if (torchFrag.lightSensitivity<1000) {
 			if (lux >= lightSensitivity) {
 				cancelSos();
 				playNotification();
