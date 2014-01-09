@@ -13,8 +13,8 @@
     <string name="loopxtimestitle">Loop X</string>
     <string name="loopxtimessummary">Send SOS X times</string>
     <string name="sosspeedtitle">Speed</string>
-    <string name="sosspeedsummary">Of the SOS</string>
-    <string name="timebetweensostitle">SOS frequancy</string>
+    <string name="sosspeedsummary">Fast or slow SOS signals</string>
+    <string name="timebetweensostitle">Send the SOS every x seconds</string>
     <string name="timelbetweensossummary">Repeat every X seconds</string>
     <string name="loopuntillighttitle">Stop sending</string>
     <string name="loopuntillightsummary">As it gets light</string>

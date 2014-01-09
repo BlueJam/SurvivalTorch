@@ -172,7 +172,9 @@ public class TorchFragment extends SherlockFragment implements
 
 	public void cancelSosAsynchTask() {
 		if (running) {
-			sosLight.cancel(true);
+			if (sosLight != null && sosLight.getStatus() != AsyncTask.Status.FINISHED){
+				sosLight.cancel(true);
+			}
 		}
 	}
 

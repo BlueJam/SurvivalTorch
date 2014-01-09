@@ -1,6 +1,8 @@
 sorting out errors with asynchtask - still possible to hit 'stop' and make the light stay on when it's signaling, very hard and specific timing though - fixed 'I think!!!'
 
 keeps running even when the screen is off
+For cameras where this doesn't work, a super low screen brightness option?
+
 
 Merge the light preferences:
 
@@ -14,3 +16,6 @@ Light - 640 lux
 Leave on all the time
 
 
+MyAsyncTask objUploader;
+if (objUploader != null && objUploader.getStatus() != AsyncTask.Status.FINISHED)
+objUploader.cancel(true);
