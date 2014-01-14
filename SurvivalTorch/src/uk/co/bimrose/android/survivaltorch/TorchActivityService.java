@@ -5,7 +5,9 @@ import android.app.NotificationManager;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
-import android.os.AsyncTask;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -20,8 +22,9 @@ public class TorchActivityService extends IntentService {
 
 	PowerManager pm;
 	boolean screenOn = true;
-	
-	ScreenCheck screenCheck;
+
+	Uri notification;
+	Ringtone r;
 
 	public TorchActivityService() {
 		super("TorchActivityService");
@@ -30,44 +33,13 @@ public class TorchActivityService extends IntentService {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		getCamera();
-		screenCheck = (ScreenCheck) new ScreenCheck().execute();
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if (cam != null) {
-			cam.release();
-			cam = null;
-		}
 	}
-	
-	
-	
-	private class ScreenCheck extends AsyncTask<Void, Void, Void> {
-		@Override
-		protected Void doInBackground(Void... args) {
-			
-			turnOnFlash();
-			PowerManager powerManager;
-			while (screenOn) {
-				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-				//if screen is off && screenOn = true
-				if (!powerManager.isScreenOn() && (powerManager.isScreenOn() != screenOn)) {
-					screenOn = false;
-					turnOffFlash();
-					turnOnFlash();
-				}
-			}
-			
-			return null;
-		}
-	}
-	
-	
-	
-	
+
 	@Override
 	public void onHandleIntent(Intent i) {
 
@@ -81,15 +53,47 @@ public class TorchActivityService extends IntentService {
 		 * Integer.parseInt(extras.getString("bPct"));
 		 **/
 
-		// build the torch here with the values above
-		
-		
+		notification = RingtoneManager
+				.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+		r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 
-		
-		while(true){
-			
+		// loop through checking if the screen has been turned off
+		PowerManager powerManager;
+
+		while (true) {
+			getCamera();
+			// build the torch here with the values above
+			turnOnFlash();
+			while (screenOn) {
+				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+				// if screen is off && screenOn = true
+				if (!powerManager.isScreenOn()
+						&& (powerManager.isScreenOn() != screenOn)) {
+					screenOn = false;
+					turnOffFlash();
+					//we need to sleep for a moment here to let the camera be turned off properly
+					//without this the light didn't always come back on again.
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					turnOnFlash();
+				}
+			}
+
+			while (!screenOn) {
+				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+				// if screen is on && screenOn = false
+				if (powerManager.isScreenOn()
+						&& (powerManager.isScreenOn() != screenOn)) {
+					screenOn = true;
+				}
+			}
+
 		}
-		
+
 		// this should send a silent notification that lets you get back to the
 		// torch by clicking on it
 		// raiseNotification();
@@ -137,10 +141,14 @@ public class TorchActivityService extends IntentService {
 		}
 	}
 
-	private void turnOnFlash() {
-		if (cam == null || p == null) {
-			return;
+	private void releaseCamera() {
+		if (cam != null) {
+			cam.release();
+			cam = null;
 		}
+	}
+
+	private void turnOnFlash() {
 		p = cam.getParameters();
 		p.setFlashMode(Parameters.FLASH_MODE_TORCH);
 		cam.setParameters(p);
@@ -148,9 +156,6 @@ public class TorchActivityService extends IntentService {
 	}
 
 	public void turnOffFlash() {
-		if (cam == null || p == null) {
-			return;
-		}
 		p = cam.getParameters();
 		p.setFlashMode(Parameters.FLASH_MODE_OFF);
 		cam.setParameters(p);
