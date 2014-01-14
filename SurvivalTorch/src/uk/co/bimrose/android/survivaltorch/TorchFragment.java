@@ -1,6 +1,9 @@
 package uk.co.bimrose.android.survivaltorch;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
@@ -13,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
@@ -38,7 +42,7 @@ public class TorchFragment extends SherlockFragment implements
 	int sosSpeed = 500;
 	boolean isThereALightSensor;
 	boolean running = false;
-
+	
 	private Sos sosLight;
 
 	public static float lightLevel;
@@ -106,9 +110,10 @@ public class TorchFragment extends SherlockFragment implements
 		sosSpeed = Integer.valueOf(prefs.getString("sosspeed", "500"));
 
 		message.setText("");
-		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity", "1000000"));
+		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity",
+				"1000000"));
 
-		if (lightSensitivity<1000) {
+		if (lightSensitivity < 1000) {
 			if (!isThereALightSensor) {
 				message.setText("Sorry, you don't have a light sensor");
 				prefs.edit().remove("lightSensitivity").commit();
@@ -156,6 +161,23 @@ public class TorchFragment extends SherlockFragment implements
 			break;
 		case R.id.button_stop:
 			turnOffFlash();
+			// ***************Added for service*********************
+			if (cam != null) {
+				cam.release();
+				cam = null;
+			}
+			Intent i = new Intent(getActivity(), TorchActivityService.class);
+			Bundle extras = new Bundle();
+			extras.putString("lXTimes", "loopXTimes");
+			extras.putString("tBSignals", "timeBetweenSignals");
+			extras.putString("sSpeed", "sosSpeed");
+			extras.putString("lSensitivity", "lightSensitivity");
+			extras.putString("bPct", "batteryPct");
+			i.putExtras(extras);
+			getActivity().startService(i);
+//****************************************************************************************************************
+			//getActivity().finish();
+			// ***************End added for service*********************
 			break;
 		default:
 			throw new RuntimeException("Unknown button ID");
@@ -171,7 +193,8 @@ public class TorchFragment extends SherlockFragment implements
 
 	public void cancelSosAsynchTask() {
 		if (running) {
-			if (sosLight != null && sosLight.getStatus() != AsyncTask.Status.FINISHED){
+			if (sosLight != null
+					&& sosLight.getStatus() != AsyncTask.Status.FINISHED) {
 				sosLight.cancel(true);
 			}
 		}
@@ -201,7 +224,6 @@ public class TorchFragment extends SherlockFragment implements
 			isFlashOn = true;
 			cam.startPreview();
 		}
-
 	}
 
 	public void turnOffFlash() {
@@ -230,7 +252,8 @@ public class TorchFragment extends SherlockFragment implements
 			} else {
 				if (loopXTimes > 0) {
 					for (int i = 0; i < loopXTimes; i++) {
-						if (isCancelled()) break;
+						if (isCancelled())
+							break;
 						sos();
 					}
 				}
@@ -242,7 +265,8 @@ public class TorchFragment extends SherlockFragment implements
 			try {
 				// dot dot dot, dash dash dash, dot dot dot
 				for (int i = 0; i < 9; i++) {
-					if (isCancelled()) break;
+					if (isCancelled())
+						break;
 					int flashOn = sosSpeed;
 					int sleepTime = sosSpeed;
 					if (i > 2 && i < 6) {
@@ -287,5 +311,13 @@ public class TorchFragment extends SherlockFragment implements
 	public interface BatteryLowListener {
 		public void onLowBattery();
 	}
+
+	// ***************Added for service*********************
+	private BroadcastReceiver onEvent = new BroadcastReceiver() {
+		public void onReceive(Context ctxt, Intent i) {
+			Toast.makeText(getActivity(), "Download complete",
+					Toast.LENGTH_LONG).show();
+		}
+	};
 
 }

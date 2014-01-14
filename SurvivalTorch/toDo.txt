@@ -1,21 +1,6 @@
-sorting out errors with asynchtask - still possible to hit 'stop' and make the light stay on when it's signaling, very hard and specific timing though - fixed 'I think!!!'
-
 keeps running even when the screen is off
 For cameras where this doesn't work, a super low screen brightness option?
 
+Set up a few broadcast senders and receivers to see exactly how they work
 
-Merge the light preferences:
-
-Stop sending SOS
-As it gets light?
-How light do you want it to be when the SOS stops being sent:
-Dark - 40 lux
-.
-.
-Light - 640 lux
-Leave on all the time
-
-
-MyAsyncTask objUploader;
-if (objUploader != null && objUploader.getStatus() != AsyncTask.Status.FINISHED)
-objUploader.cancel(true);
+Implement the service / notification combo for the torch.

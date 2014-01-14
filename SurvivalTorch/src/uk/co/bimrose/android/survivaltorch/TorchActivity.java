@@ -70,7 +70,6 @@ public class TorchActivity extends SherlockFragmentActivity implements
 			getSupportFragmentManager().beginTransaction()
 					.add(R.id.batteryfrag, batteryFrag).commit();
 		}
-
 	}
 
 	@Override
@@ -84,8 +83,8 @@ public class TorchActivity extends SherlockFragmentActivity implements
 		switch (item.getItemId()) {
 		case R.id.prefs:
 			cancelSos();
-			//let the preferences know if the light sensor is present
-			//if it is then don't show the option
+			// let the preferences know if the light sensor is present
+			// if it is then don't show the option
 			Intent i = new Intent(this, Preferences.class);
 			i.putExtra("lightSensor", torchFrag.isThereALightSensor);
 			startActivity(i);
@@ -98,7 +97,7 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	public void onlightChanged(float lux, int lightSensitivity) {
 		// checks if the light level is above or equal to the threshold set
 		torchFrag.message.setText(Float.toString(lux));
-		if (torchFrag.lightSensitivity<1000) {
+		if (torchFrag.lightSensitivity < 1000) {
 			if (lux >= lightSensitivity) {
 				cancelSos();
 				playNotification();
@@ -106,8 +105,8 @@ public class TorchActivity extends SherlockFragmentActivity implements
 			}
 		}
 	}
-	
-	public void cancelSos(){
+
+	public void cancelSos() {
 		torchFrag.cancelSosAsynchTask();
 		torchFrag.turnOffFlash();
 	}
@@ -119,7 +118,8 @@ public class TorchActivity extends SherlockFragmentActivity implements
 			Ringtone r = RingtoneManager.getRingtone(getApplicationContext(),
 					notification);
 			r.play();
-			// stops the alert playing over and over as the lighting / battery charge changes
+			// stops the alert playing over and over as the lighting / battery
+			// charge changes
 			soundAlert = false;
 		}
 	}
