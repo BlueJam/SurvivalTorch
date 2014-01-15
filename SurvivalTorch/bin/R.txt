@@ -377,6 +377,7 @@ int string sosspeedsummary 0x7f0a0017
 int string sosspeedtitle 0x7f0a0016
 int string timebetweensostitle 0x7f0a0018
 int string timelbetweensossummary 0x7f0a0019
+int string turntorchoff 0x7f0a0024
 int style AppBaseTheme 0x7f0b0059
 int style AppTheme 0x7f0b005a
 int style Sherlock___TextAppearance_Small 0x7f0b0046

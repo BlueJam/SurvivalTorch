@@ -24,5 +24,6 @@
     <string name="keepscreenonsummary">Keep the screen on</string>
     <string name="forcetimeouttitle">Force close</string>
     <string name="forcetimeoutsummary">Let the screen timeout on low battery or daylight</string>
+    <string name="turntorchoff">Turn torch off here</string>
 
 </resources>

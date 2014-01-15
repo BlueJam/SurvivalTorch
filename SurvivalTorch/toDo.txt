@@ -3,4 +3,18 @@ For cameras where this doesn't work, a super low screen brightness option?
 
 Set up a few broadcast senders and receivers to see exactly how they work
 
-Implement the service / notification combo for the torch.
+Option to turn light on as soon as the app is opened.
+
+Ability to change notification tone
+
+Change the importance of the notification?
+
+Option to turn light off when screen is turned off
+
+Option to leave light on after you close the app
+if this option is chosen then:
+Icon shown in Notification Bar to stop light or open app
+
+Service needs to start when the light / SOS is turned on and stop when they are stopped,
+either in app or from the Notification.
+

@@ -1,7 +1,9 @@
 package uk.co.bimrose.android.survivaltorch;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
@@ -17,6 +19,9 @@ public class TorchActivityService extends IntentService {
 	NotificationCompat.Builder b;
 	NotificationManager mgr;
 
+	private static int NOTIFY_ID = 1337;
+	private static int FOREGROUND_ID = 1338;
+
 	Camera cam = null;
 	Parameters p = null;
 
@@ -25,6 +30,8 @@ public class TorchActivityService extends IntentService {
 
 	Uri notification;
 	Ringtone r;
+	
+	boolean stopnotification = false;
 
 	public TorchActivityService() {
 		super("TorchActivityService");
@@ -32,11 +39,13 @@ public class TorchActivityService extends IntentService {
 
 	@Override
 	public void onCreate() {
+		getCamera();
 		super.onCreate();
 	}
 
 	@Override
 	public void onDestroy() {
+		releaseCamera();
 		super.onDestroy();
 	}
 
@@ -53,15 +62,12 @@ public class TorchActivityService extends IntentService {
 		 * Integer.parseInt(extras.getString("bPct"));
 		 **/
 
-		notification = RingtoneManager
-				.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-		r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+		raiseNotification();
 
 		// loop through checking if the screen has been turned off
 		PowerManager powerManager;
 
 		while (true) {
-			getCamera();
 			// build the torch here with the values above
 			turnOnFlash();
 			while (screenOn) {
@@ -71,8 +77,9 @@ public class TorchActivityService extends IntentService {
 						&& (powerManager.isScreenOn() != screenOn)) {
 					screenOn = false;
 					turnOffFlash();
-					//we need to sleep for a moment here to let the camera be turned off properly
-					//without this the light didn't always come back on again.
+					// we need to sleep for a moment here to let the camera be
+					// turned off properly
+					// without this the light didn't always come back on again.
 					try {
 						Thread.sleep(200);
 					} catch (InterruptedException e) {
@@ -89,45 +96,58 @@ public class TorchActivityService extends IntentService {
 				if (powerManager.isScreenOn()
 						&& (powerManager.isScreenOn() != screenOn)) {
 					screenOn = true;
+					
+					//stopForegroundService();
+					//raiseNotification();
 				}
 			}
-
+			stopForeground(stopnotification);
 		}
 
 		// this should send a silent notification that lets you get back to the
 		// torch by clicking on it
 		// raiseNotification();
 
-		/**
-		 * Uri notification = RingtoneManager
-		 * .getDefaultUri(RingtoneManager.TYPE_NOTIFICATION); Ringtone r =
-		 * RingtoneManager.getRingtone(getApplicationContext(), notification);
-		 * for(int x = 0;x <= 10;x++){ r.play(); try { Thread.sleep(1000); }
-		 * catch (InterruptedException e) { e.printStackTrace(); } }
-		 **/
-
 	}
 
-	/**
-	 * private void raiseNotification() { b = new
-	 * NotificationCompat.Builder(this);
-	 * 
-	 * b.setAutoCancel(true).setDefaults(Notification.DEFAULT_ALL)
-	 * .setWhen(System.currentTimeMillis());
-	 * 
-	 * b.setContentTitle(getString(R.string.app_name))
-	 * .setContentText(getString(R.string.keepscreenontitle))
-	 * .setSmallIcon(android.R.drawable.stat_sys_download_done)
-	 * .setTicker(getString(R.string.app_name));
-	 * 
-	 * Intent outbound = new Intent(Intent.ACTION_VIEW);
-	 * 
-	 * b.setContentIntent(PendingIntent.getActivity(this, 0, outbound, 0));
-	 * 
-	 * mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-	 * 
-	 * mgr.notify(NOTIFY_ID, b.build()); }
-	 **/
+
+	private Notification buildForegroundNotification(String contextText) {
+		
+		NotificationCompat.Builder b = new NotificationCompat.Builder(this);
+
+		b.setOngoing(true);
+		
+		b.setAutoCancel(true).setDefaults(Notification.DEFAULT_ALL)
+		.setWhen(System.currentTimeMillis());
+
+		b.setContentTitle(getString(R.string.app_name)) 
+				.setContentText(contextText)
+				.setSmallIcon(android.R.drawable.stat_sys_download)
+				.setTicker(getString(R.string.turntorchoff));
+		
+		Intent outbound = new Intent(this, TorchActivity.class);
+
+		b.setContentIntent(PendingIntent.getActivity(this, 0, outbound, 0));
+
+		return (b.build());
+	}
+
+	private void raiseNotification() {
+		NotificationCompat.Builder b = new NotificationCompat.Builder(this);
+
+		b.setAutoCancel(true).setWhen(System.currentTimeMillis());
+		b.setContentIntent(PendingIntent.getActivity(this, 0, new Intent(), 0));
+
+		b.setContentTitle(getString(R.string.app_name)) 
+		.setContentText("Grrrrrrrrrrrrrrrrrr")
+		.setSmallIcon(android.R.drawable.stat_sys_download)
+		.setTicker(getString(R.string.turntorchoff));
+
+		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+		mgr.notify(NOTIFY_ID, b.build());
+
+	}
 
 	// get camera parameters
 	private void getCamera() {
