@@ -1,5 +1,6 @@
 package uk.co.bimrose.android.survivaltorch;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
@@ -30,34 +31,42 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	// threshold that has been set
 	private boolean soundAlert = false;
 	boolean closeActivity = false;
-	String toastMsg = "false";
-
 	Intent i;
+	
+	SharedPreferences prefsEdit;
+	String activityRunning;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
-		
-		//this means that the Notification has been clicked to stop the service
-		//it also closes this activity so the app is no longer running
-		Bundle extras = getIntent().getExtras();
-		if(extras != null){
-			closeActivity = extras.getBoolean("closeActivity");
-			if(closeActivity){
-				toastMsg = "true";
-				TorchActivityService.keepRunning = false;
-				toast();
-				finish();
-			}
-		}
-		
-		
 		setContentView(R.layout.main);
+
 
 		// have they selected to keep the screen on?
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
+		
+		boolean activityCheck = prefs.getBoolean("activityrunning", true);
+		
+		// this means that the Notification has been clicked to stop the service
+		// it also closes this activity so the app is no longer running
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			closeActivity = extras.getBoolean("closeActivity");
+			if (closeActivity) {
+				TorchActivityService.keepRunning = false;
+				//toast(sBool);
+				if(!activityCheck){
+					toast("true");
+					finish();
+				}
+			}
+		}
+
+		
+		
+		
 		keepScreenOn = Boolean.valueOf(prefs.getBoolean("keepscreenon", false));
 		if (keepScreenOn) {
 			// stops main screen closing
@@ -91,12 +100,19 @@ public class TorchActivity extends SherlockFragmentActivity implements
 			getSupportFragmentManager().beginTransaction()
 					.add(R.id.batteryfrag, batteryFrag).commit();
 		}
+		
+		//the TorchActivity is running!!!
+		prefsEdit = PreferenceManager.getDefaultSharedPreferences(this);
+		activityOpen(true);
 	}
-	
-	
-	public void toast() {
+
+	public void toast(String toastMsg) {
 		Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG)
 				.show();
+	}
+	
+	public void activityOpen(boolean b){
+		prefsEdit.edit().putBoolean("activityrunning", b).commit();
 	}
 
 	@Override
@@ -203,4 +219,25 @@ public class TorchActivity extends SherlockFragmentActivity implements
 			// this.finish();
 		}
 	}
+	
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        activityOpen(true);
+    }
+    
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        activityOpen(true);
+    }
+	
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        activityOpen(false);
+    }
 }

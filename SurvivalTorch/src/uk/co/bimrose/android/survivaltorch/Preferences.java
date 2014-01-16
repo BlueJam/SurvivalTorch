@@ -9,6 +9,7 @@ import com.actionbarsherlock.app.SherlockPreferenceActivity;
 public class Preferences extends SherlockPreferenceActivity {
 
 	boolean lightSensor;
+	PreferenceScreen preferenceScreen;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -16,25 +17,27 @@ public class Preferences extends SherlockPreferenceActivity {
 
 		addPreferencesFromResource(R.xml.preferences);
 
+		// used to save the state of the TorchActivity for the notification
+		// click, is it running, or has it been destroyed?
+		preferenceScreen = getPreferenceScreen();
+		Preference activityRunning = findPreference("activityrunning");
+		preferenceScreen.removePreference(activityRunning);
+
 		isThereALightSensor();
 	}
 
 	public void isThereALightSensor() {
-		//passed from the TorchActivity, is there a lightsensor?
+		// passed from the TorchActivity, is there a lightsensor?
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			lightSensor = extras.getBoolean("lightSensor");
 		}
-		if (!lightSensor) {
-			//If there isn't a light sensor then these two preferences are obsolete
-			//They are deleted from the preference menu
-			PreferenceScreen preferenceScreen = getPreferenceScreen();
 
+		if (!lightSensor) {
+			// If there isn't a light sensor then this preference is obsolete
+			// IIt is deleted from the preference menu
 			Preference lightSensitivityPrefs = findPreference("lightsensitivity");
 			preferenceScreen.removePreference(lightSensitivityPrefs);
-
-			Preference loopUntilLightPref = findPreference("loopuntillight");
-			preferenceScreen.removePreference(loopUntilLightPref);
 		}
 
 	}

@@ -48,5 +48,8 @@
         android:key="forcetimeout"
         android:summary="@string/forcetimeoutsummary"
         android:title="@string/forcetimeouttitle" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="activityrunning" />
 
 </PreferenceScreen>

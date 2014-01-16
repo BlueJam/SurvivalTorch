@@ -96,11 +96,6 @@ public class LightFragment extends SherlockFragment implements
 	}
 
 	public void sensorCheck() {
-		//used to edit a preference
-		prefsEdit = getActivity().getSharedPreferences(
-				"uk.co.bimrose.android.survivaltorch", Context.MODE_PRIVATE);
-		loopUntilLight = "uk.co.bimrose.android.survivaltorch.loopUntilLight";
-		
 		mSensorManager = (SensorManager) getActivity().getSystemService(
 				Context.SENSOR_SERVICE);
 		
@@ -117,8 +112,6 @@ public class LightFragment extends SherlockFragment implements
 	}
 	
 	public void updateLightSensorStatus(){
-		//used to edit the loopUntilLight preference
-		prefsEdit.edit().putBoolean(loopUntilLight, isThereALightSensor).commit();
 		//let the TorchFragment know there is a light sensor
 		lSListener.lightSensorCheck(isThereALightSensor);
 	}
