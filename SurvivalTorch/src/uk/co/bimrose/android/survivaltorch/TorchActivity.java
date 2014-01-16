@@ -1,5 +1,7 @@
 package uk.co.bimrose.android.survivaltorch;
 
+import java.io.Serializable;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
@@ -18,7 +20,7 @@ public class TorchActivity extends SherlockFragmentActivity implements
 		LightFragment.DaytimeListener, TorchFragment.BatteryLowListener,
 		TorchFragment.AlertResetListener,
 		BatteryFragment.BatteryChargeListener,
-		LightFragment.LightSensorListener {
+		LightFragment.LightSensorListener, TorchFragment.ServiceListener {
 
 	boolean keepScreenOn = false;
 	private TorchFragment torchFrag = null;
@@ -29,8 +31,11 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	// threshold that has been set
 	private boolean soundAlert = false;
 
+	Intent i;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
@@ -82,7 +87,6 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.prefs:
-			cancelSos();
 			// let the preferences know if the light sensor is present
 			// if it is then don't show the option
 			Intent i = new Intent(this, Preferences.class);
@@ -99,16 +103,11 @@ public class TorchActivity extends SherlockFragmentActivity implements
 		torchFrag.message.setText(Float.toString(lux));
 		if (torchFrag.lightSensitivity < 1000) {
 			if (lux >= lightSensitivity) {
-				cancelSos();
+
 				playNotification();
 				enableScreenTimeout();
 			}
 		}
-	}
-
-	public void cancelSos() {
-		torchFrag.cancelSosAsynchTask();
-		torchFrag.turnOffFlash();
 	}
 
 	public void playNotification() {
@@ -150,7 +149,6 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	@Override
 	public void onLowBattery() {
 		enableScreenTimeout();
-		cancelSos();
 		playNotification();
 	}
 
@@ -159,4 +157,28 @@ public class TorchActivity extends SherlockFragmentActivity implements
 		torchFrag.isThereALightSensor = isThereALightSensor;
 	}
 
+	@Override
+	public void startService() {
+		i = new Intent(this, TorchActivityService.class);
+		Bundle extras = new Bundle();
+		extras.putString("lXTimes", "loopXTimes");
+		extras.putString("tBSignals", "timeBetweenSignals");
+		extras.putString("sSpeed", "sosSpeed");
+		extras.putString("lSensitivity", "lightSensitivity");
+		extras.putString("bPct", "batteryPct");
+		i.putExtras(extras);
+		this.startService(i);
+
+		// ****************************************************************************************************************
+
+		// ***************End added for service*********************
+	}
+	
+	@Override
+	public void stopService() {
+		if(i != null){
+		this.stopService(i);
+		// this.finish();
+		}
+	}
 }
