@@ -1,7 +1,5 @@
 package uk.co.bimrose.android.survivaltorch;
 
-import java.io.Serializable;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
@@ -10,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -30,6 +29,8 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	// the
 	// threshold that has been set
 	private boolean soundAlert = false;
+	boolean closeActivity = false;
+	String toastMsg = "false";
 
 	Intent i;
 
@@ -37,6 +38,21 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
+		
+		//this means that the Notification has been clicked to stop the service
+		//it also closes this activity so the app is no longer running
+		Bundle extras = getIntent().getExtras();
+		if(extras != null){
+			closeActivity = extras.getBoolean("closeActivity");
+			if(closeActivity){
+				toastMsg = "true";
+				TorchActivityService.keepRunning = false;
+				toast();
+				finish();
+			}
+		}
+		
+		
 		setContentView(R.layout.main);
 
 		// have they selected to keep the screen on?
@@ -75,6 +91,12 @@ public class TorchActivity extends SherlockFragmentActivity implements
 			getSupportFragmentManager().beginTransaction()
 					.add(R.id.batteryfrag, batteryFrag).commit();
 		}
+	}
+	
+	
+	public void toast() {
+		Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG)
+				.show();
 	}
 
 	@Override
@@ -173,12 +195,12 @@ public class TorchActivity extends SherlockFragmentActivity implements
 
 		// ***************End added for service*********************
 	}
-	
+
 	@Override
 	public void stopService() {
-		if(i != null){
-		this.stopService(i);
-		// this.finish();
+		if (i != null) {
+			this.stopService(i);
+			// this.finish();
 		}
 	}
 }

@@ -8,6 +8,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.media.Ringtone;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -69,7 +70,7 @@ public class TorchActivityService extends IntentService {
 			// build the torch here with the values above
 			turnOnFlash();
 			while (screenOn) {
-				if(!keepRunning){
+				if (!keepRunning) {
 					break;
 				}
 				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
@@ -92,7 +93,7 @@ public class TorchActivityService extends IntentService {
 			}
 
 			while (!screenOn) {
-				if(!keepRunning){
+				if (!keepRunning) {
 					break;
 				}
 				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
@@ -113,8 +114,16 @@ public class TorchActivityService extends IntentService {
 		NotificationCompat.Builder b = new NotificationCompat.Builder(this);
 
 		b.setAutoCancel(true).setWhen(System.currentTimeMillis());
-		Intent i = new Intent(this, CloseService.class);
-		b.setContentIntent(PendingIntent.getActivity(this, 0, i, 0));
+		Intent i = new Intent(this, TorchActivity.class);
+		Bundle bundle = new Bundle();
+		bundle.putBoolean("closeActivity", true);
+		// this clears the stack (I think!) and stops the TorchActivity opening
+		// up again once finish() has been called on it
+		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		i.putExtras(bundle);
+		//FLAG_CANCEL_CURRENT is needed to preserve the Extras added to the PendingIntent
+		b.setContentIntent(PendingIntent.getActivity(this, 0, i,PendingIntent.FLAG_CANCEL_CURRENT));
+		// The code: new Intent() opens a blank intent (I think)
 		//b.setContentIntent(PendingIntent.getActivity(this, 0, new Intent(),0));
 
 		b.setContentTitle(getString(R.string.app_name))
@@ -164,11 +173,11 @@ public class TorchActivityService extends IntentService {
 			cam.stopPreview();
 		}
 	}
-		/**
-		 * Uri notification = RingtoneManager
-		 * .getDefaultUri(RingtoneManager.TYPE_NOTIFICATION); Ringtone r =
-		 * RingtoneManager.getRingtone(getApplicationContext(), notification);
-		 * r.play();
-		 **/
+	/**
+	 * Uri notification = RingtoneManager
+	 * .getDefaultUri(RingtoneManager.TYPE_NOTIFICATION); Ringtone r =
+	 * RingtoneManager.getRingtone(getApplicationContext(), notification);
+	 * r.play();
+	 **/
 
 }
