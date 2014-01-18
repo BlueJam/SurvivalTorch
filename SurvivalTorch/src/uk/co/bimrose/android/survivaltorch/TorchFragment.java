@@ -88,6 +88,7 @@ public class TorchFragment extends SherlockFragment implements
 		buttonSos = (Button) result.findViewById(R.id.button_sos);
 		buttonSosPreset = (Button) result.findViewById(R.id.button_sos_preset);
 		buttonStop = (Button) result.findViewById(R.id.button_stop);
+		buttonStop.setEnabled(false);
 		message = (TextView) result.findViewById(R.id.message);
 		batteryMessage = (TextView) result.findViewById(R.id.batterymessage);
 
@@ -131,18 +132,35 @@ public class TorchFragment extends SherlockFragment implements
 
 		switch (view.getId()) {
 		case R.id.button_full:
-			//stop service
+			//stop any service already running
 			sListener.stopService();
+			//start service
+			sListener.startService("on");
+			buttonFull.setEnabled(false);
+			try {
+				Thread.sleep(400);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			buttonStop.setEnabled(true);
 			break;
 		case R.id.button_sos:
-			single = true;
+			sListener.stopService();
+			sListener.startService("sos");
 			break;
 		case R.id.button_sos_preset:
-			single = false;
+			sListener.startService("sosPreset");
 			break;
 		case R.id.button_stop:
-			//start service
-			sListener.startService();
+			buttonStop.setEnabled(false);
+			//stop service
+			sListener.stopService();
+			try {
+				Thread.sleep(400);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			buttonFull.setEnabled(true);
 			break;
 		default:
 			throw new RuntimeException("Unknown button ID");
@@ -170,7 +188,7 @@ public class TorchFragment extends SherlockFragment implements
 	
 	// Container Activity must implement this interface
 	public interface ServiceListener {
-		public void startService();
+		public void startService(String s);
 		public void stopService();
 	}
 

@@ -3,38 +3,53 @@ package uk.co.bimrose.android.survivaltorch;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.media.Ringtone;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 public class TorchActivityService extends IntentService {
 
 	NotificationCompat.Builder b;
 	NotificationManager mgr;
 
-	private static int NOTIFY_ID = 1337;
+	public static int NOTIFY_ID = 1337;
 	private static int FOREGROUND_ID = 1338;
 
 	Camera cam = null;
+	boolean camRegistered = false;
 	Parameters p = null;
-
-	PowerManager pm;
+	PowerManager powerManager;
 	boolean screenOn = true;
-
 	Uri notification;
 	Ringtone r;
-
 	public static boolean keepRunning = true;
+	int loopXTimes;
+	int sosSpeed = 500;
+	int timeBetweenSignals = 5;
+	int lightSensitivity = 1000000;
+	int batteryPct = 50;
 
+	String click;
+	SharedPreferences prefs;
+	
+	
+	private Handler handler; 
+	
+	
 	public TorchActivityService() {
 		super("TorchActivityService");
-	}
+	} 
 
 	@Override
 	public void onCreate() {
@@ -47,67 +62,100 @@ public class TorchActivityService extends IntentService {
 		releaseCamera();
 		super.onDestroy();
 	}
+	
+	@Override  
+	public int onStartCommand(Intent intent, int flags, int startId) {  
+	   handler = new Handler();  
+	   return super.onStartCommand(intent, flags, startId);  
+	} 
 
 	@Override
 	public void onHandleIntent(Intent i) {
+		
+		getPreferences();
 
-		/**
-		 * killIt Intent intent = i; Bundle extras = intent.getExtras(); int
-		 * loopXTimes = Integer.parseInt(extras.getString("lXTimes")); int
-		 * timeBetweenSignals = Integer
-		 * .parseInt(extras.getString("tBSignals")); int sosSpeed =
-		 * Integer.parseInt(extras.getString("sSpeed")); int lightSensitivity =
-		 * Integer.parseInt(extras .getString("lSensitivity")); int batteryPct =
-		 * Integer.parseInt(extras.getString("bPct"));
-		 **/
+		Bundle extras = i.getExtras();
+		if (extras != null) {
+			click = extras.getString("click");
+		}
 
 		raiseNotification();
+		
+		keepRunning = true;
+		//how did we get here? button clicks.
+		if (click.equals("on")) {
+			lightOn();
+		} else if (click.equals("sos")) {
+			sos();
+		} else if (click.equals("sospreset")) {
+			sosPreset();
+		}
+	}
 
+	
+	public void lightOn() {
 		// loop through checking if the screen has been turned off
-		PowerManager powerManager;
-
 		while (keepRunning) {
 			// build the torch here with the values above
 			turnOnFlash();
 			while (screenOn) {
-				if (!keepRunning) {
+				if (!keepRunning)
 					break;
-				}
 				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-				// if screen is off && screenOn = true
 				if (!powerManager.isScreenOn()
 						&& (powerManager.isScreenOn() != screenOn)) {
 					screenOn = false;
 					turnOffFlash();
-					// we need to sleep for a moment here to let the camera be
-					// turned off properly
-					// without this the light didn't always come back on again.
+					// sleep to let the camera be turned off properly
+					// without this the light didn't always come back on
 					try {
 						Thread.sleep(200);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					turnOnFlash();
 				}
 			}
-
 			while (!screenOn) {
-				if (!keepRunning) {
+				if (!keepRunning)
 					break;
-				}
 				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-				// if screen is on && screenOn = false
 				if (powerManager.isScreenOn()
 						&& (powerManager.isScreenOn() != screenOn)) {
 					screenOn = true;
 				}
 			}
 		}
-		// this should send a silent notification that lets you get back to the
-		// torch by clicking on it
-		// raiseNotification();
-		// stopForeground(true);
+	}
+
+	public void sos() {
+		try {
+			// dot dot dot, dash dash dash, dot dot dot
+			for (int i = 0; i < 9; i++) {
+				int flashOn = sosSpeed;
+				int sleepTime = sosSpeed;
+				if (i > 2 && i < 6) {
+					flashOn = sosSpeed * 3;
+				}
+				if (!keepRunning)
+					break;
+				turnOnFlash();
+				Thread.sleep(flashOn);
+				if (!keepRunning)
+					break;
+				turnOffFlash();
+				Thread.sleep(sleepTime);
+				if (!keepRunning)
+					break;
+			}
+			Thread.sleep(timeBetweenSignals * 1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sosPreset() {
+		// still to do
 	}
 
 	private void raiseNotification() {
@@ -121,10 +169,13 @@ public class TorchActivityService extends IntentService {
 		// up again once finish() has been called on it
 		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		i.putExtras(bundle);
-		//FLAG_CANCEL_CURRENT is needed to preserve the Extras added to the PendingIntent
-		b.setContentIntent(PendingIntent.getActivity(this, 0, i,PendingIntent.FLAG_CANCEL_CURRENT));
+		// FLAG_CANCEL_CURRENT is needed to preserve the Extras added to the
+		// PendingIntent
+		b.setContentIntent(PendingIntent.getActivity(this, 0, i,
+				PendingIntent.FLAG_CANCEL_CURRENT));
 		// The code: new Intent() opens a blank intent (I think)
-		//b.setContentIntent(PendingIntent.getActivity(this, 0, new Intent(),0));
+		// b.setContentIntent(PendingIntent.getActivity(this, 0, new
+		// Intent(),0));
 
 		b.setContentTitle(getString(R.string.app_name))
 				.setContentText("Grrrrrrrrrrrrrrrrrr")
@@ -135,6 +186,18 @@ public class TorchActivityService extends IntentService {
 
 		mgr.notify(NOTIFY_ID, b.build());
 
+	}
+	
+	public void getPreferences(){
+		Context ctx = getApplicationContext();
+		prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+		loopXTimes = Integer.valueOf(prefs.getString("loopxtimes", "1"));
+		sosSpeed = Integer.valueOf(prefs.getString("sosspeed", "500"));
+		timeBetweenSignals = Integer.valueOf(prefs.getString(
+				"timebetweenloops", "5"));
+		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity",
+				"1000000"));
+		batteryPct = Integer.valueOf(prefs.getString("batterypct", "50"));
 	}
 
 	// get camera parameters
@@ -157,27 +220,33 @@ public class TorchActivityService extends IntentService {
 	}
 
 	private void turnOnFlash() {
-		if (cam != null) {
-			p = cam.getParameters();
+		if (cam != null && !camRegistered) {
 			p.setFlashMode(Parameters.FLASH_MODE_TORCH);
+			//toast(Boolean.toString(camRegistered));
 			cam.setParameters(p);
 			cam.startPreview();
+			camRegistered = true;
 		}
 	}
 
 	public void turnOffFlash() {
-		if (cam != null) {
-			p = cam.getParameters();
+		if (cam != null && camRegistered) {
 			p.setFlashMode(Parameters.FLASH_MODE_OFF);
+			toast(Boolean.toString(camRegistered));
 			cam.setParameters(p);
 			cam.stopPreview();
+			camRegistered = false;
 		}
 	}
-	/**
-	 * Uri notification = RingtoneManager
-	 * .getDefaultUri(RingtoneManager.TYPE_NOTIFICATION); Ringtone r =
-	 * RingtoneManager.getRingtone(getApplicationContext(), notification);
-	 * r.play();
-	 **/
+	
+	public void toast(String tMsg){
+		final String msg = tMsg;
+		handler.post(new Runnable() {  
+		   @Override  
+		   public void run() {  
+		      Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();  
+		   }  
+		}); 
+	}
 
 }

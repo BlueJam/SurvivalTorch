@@ -1,5 +1,6 @@
 package uk.co.bimrose.android.survivaltorch;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,9 +31,9 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	// the
 	// threshold that has been set
 	private boolean soundAlert = false;
-	boolean closeActivity = false;
+	boolean closeEverything = false;
 	Intent i;
-	
+
 	SharedPreferences prefsEdit;
 	String activityRunning;
 
@@ -42,31 +43,25 @@ public class TorchActivity extends SherlockFragmentActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-
 		// have they selected to keep the screen on?
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
-		
+
 		boolean activityCheck = prefs.getBoolean("activityrunning", true);
-		
+
 		// this means that the Notification has been clicked to stop the service
 		// it also closes this activity so the app is no longer running
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			closeActivity = extras.getBoolean("closeActivity");
-			if (closeActivity) {
-				TorchActivityService.keepRunning = false;
-				//toast(sBool);
-				if(!activityCheck){
-					toast("true");
+			closeEverything = extras.getBoolean("closeActivity");
+			if (closeEverything) {
+				stopService();
+				if (!activityCheck) {
 					finish();
 				}
 			}
 		}
 
-		
-		
-		
 		keepScreenOn = Boolean.valueOf(prefs.getBoolean("keepscreenon", false));
 		if (keepScreenOn) {
 			// stops main screen closing
@@ -100,18 +95,18 @@ public class TorchActivity extends SherlockFragmentActivity implements
 			getSupportFragmentManager().beginTransaction()
 					.add(R.id.batteryfrag, batteryFrag).commit();
 		}
-		
-		//the TorchActivity is running!!!
+
+		// the TorchActivity is running!!!
 		prefsEdit = PreferenceManager.getDefaultSharedPreferences(this);
 		activityOpen(true);
 	}
 
 	public void toast(String toastMsg) {
-		Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG)
+		Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_SHORT)
 				.show();
 	}
-	
-	public void activityOpen(boolean b){
+
+	public void activityOpen(boolean b) {
 		prefsEdit.edit().putBoolean("activityrunning", b).commit();
 	}
 
@@ -196,48 +191,66 @@ public class TorchActivity extends SherlockFragmentActivity implements
 	}
 
 	@Override
-	public void startService() {
+	public void startService(String s) {
+		stopService();
 		i = new Intent(this, TorchActivityService.class);
 		Bundle extras = new Bundle();
-		extras.putString("lXTimes", "loopXTimes");
-		extras.putString("tBSignals", "timeBetweenSignals");
-		extras.putString("sSpeed", "sosSpeed");
-		extras.putString("lSensitivity", "lightSensitivity");
-		extras.putString("bPct", "batteryPct");
+		// which button was clicked
+		extras.putString("click", s);
 		i.putExtras(extras);
 		this.startService(i);
-
-		// ****************************************************************************************************************
-
-		// ***************End added for service*********************
 	}
 
 	@Override
 	public void stopService() {
 		if (i != null) {
-			this.stopService(i);
-			// this.finish();
+			TorchActivityService.keepRunning = false;
+			stopService(i);
+			i = null;
 		}
+		CancelNotification(this, TorchActivityService.NOTIFY_ID);
 	}
-	
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        activityOpen(true);
-    }
-    
-    @Override
-    public void onStop()
-    {
-        super.onStop();
-        activityOpen(true);
-    }
-	
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-        activityOpen(false);
-    }
+
+	public static void CancelNotification(Context ctx, int notifyId) {
+		String ns = Context.NOTIFICATION_SERVICE;
+		NotificationManager nMgr = (NotificationManager) ctx
+				.getSystemService(ns);
+		nMgr.cancel(notifyId);
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		// toast("start");
+		activityOpen(true);
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		// toast("resume");
+		activityOpen(true);
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		// toast("pause");
+		activityOpen(true);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		// toast("stop");
+		activityOpen(true);
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		// toast("destroy");
+		activityOpen(false);
+		CancelNotification(this, TorchActivityService.NOTIFY_ID);
+	}
 }
