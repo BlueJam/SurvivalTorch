@@ -42,14 +42,12 @@ public class TorchActivityService extends IntentService {
 
 	String click;
 	SharedPreferences prefs;
-	
-	
-	private Handler handler; 
-	
-	
+
+	private Handler handler;
+
 	public TorchActivityService() {
 		super("TorchActivityService");
-	} 
+	}
 
 	@Override
 	public void onCreate() {
@@ -59,19 +57,21 @@ public class TorchActivityService extends IntentService {
 
 	@Override
 	public void onDestroy() {
+		keepRunning = false;
+		turnOffFlash();
 		releaseCamera();
 		super.onDestroy();
 	}
-	
-	@Override  
-	public int onStartCommand(Intent intent, int flags, int startId) {  
-	   handler = new Handler();  
-	   return super.onStartCommand(intent, flags, startId);  
-	} 
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		handler = new Handler();
+		return super.onStartCommand(intent, flags, startId);
+	}
 
 	@Override
 	public void onHandleIntent(Intent i) {
-		
+
 		getPreferences();
 
 		Bundle extras = i.getExtras();
@@ -80,19 +80,18 @@ public class TorchActivityService extends IntentService {
 		}
 
 		raiseNotification();
-		
+
 		keepRunning = true;
-		//how did we get here? button clicks.
+		// how did we get here? button clicks.
 		if (click.equals("on")) {
 			lightOn();
 		} else if (click.equals("sos")) {
-			sos();
-		} else if (click.equals("sospreset")) {
-			sosPreset();
+			sosLoop(1);
+		} else if (click.equals("sosPreset")) {
+			sosLoop(loopXTimes);
 		}
 	}
 
-	
 	public void lightOn() {
 		// loop through checking if the screen has been turned off
 		while (keepRunning) {
@@ -127,35 +126,36 @@ public class TorchActivityService extends IntentService {
 			}
 		}
 	}
-
-	public void sos() {
-		try {
-			// dot dot dot, dash dash dash, dot dot dot
-			for (int i = 0; i < 9; i++) {
-				int flashOn = sosSpeed;
-				int sleepTime = sosSpeed;
-				if (i > 2 && i < 6) {
-					flashOn = sosSpeed * 3;
+	
+	public void sosLoop(int times) {
+		for (int x = 0; x <= times; x++) {
+			if (!keepRunning)
+				break;
+			try {
+				for (int i = 0; i < 9; i++) {
+					int flashOn = sosSpeed;
+					int sleepTime = sosSpeed;
+					if (i > 2 && i < 6) {
+						flashOn = sosSpeed * 3;
+					}
+					if (!keepRunning)
+						break;
+					turnOnFlash();
+					Thread.sleep(flashOn);
+					if (!keepRunning)
+						break;
+					turnOffFlash();
+					Thread.sleep(sleepTime);
+					if (!keepRunning)
+						break;
 				}
 				if (!keepRunning)
 					break;
-				turnOnFlash();
-				Thread.sleep(flashOn);
-				if (!keepRunning)
-					break;
-				turnOffFlash();
-				Thread.sleep(sleepTime);
-				if (!keepRunning)
-					break;
+				Thread.sleep(timeBetweenSignals * 1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			Thread.sleep(timeBetweenSignals * 1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
-	}
-
-	public void sosPreset() {
-		// still to do
 	}
 
 	private void raiseNotification() {
@@ -187,8 +187,8 @@ public class TorchActivityService extends IntentService {
 		mgr.notify(NOTIFY_ID, b.build());
 
 	}
-	
-	public void getPreferences(){
+
+	public void getPreferences() {
 		Context ctx = getApplicationContext();
 		prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 		loopXTimes = Integer.valueOf(prefs.getString("loopxtimes", "1"));
@@ -222,7 +222,7 @@ public class TorchActivityService extends IntentService {
 	private void turnOnFlash() {
 		if (cam != null && !camRegistered) {
 			p.setFlashMode(Parameters.FLASH_MODE_TORCH);
-			//toast(Boolean.toString(camRegistered));
+			// toast(Boolean.toString(camRegistered));
 			cam.setParameters(p);
 			cam.startPreview();
 			camRegistered = true;
@@ -238,15 +238,16 @@ public class TorchActivityService extends IntentService {
 			camRegistered = false;
 		}
 	}
-	
-	public void toast(String tMsg){
+
+	public void toast(String tMsg) {
 		final String msg = tMsg;
-		handler.post(new Runnable() {  
-		   @Override  
-		   public void run() {  
-		      Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();  
-		   }  
-		}); 
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT)
+						.show();
+			}
+		});
 	}
 
 }

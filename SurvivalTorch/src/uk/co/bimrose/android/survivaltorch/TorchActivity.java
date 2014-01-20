@@ -55,7 +55,7 @@ public class TorchActivity extends SherlockFragmentActivity implements
 		if (extras != null) {
 			closeEverything = extras.getBoolean("closeActivity");
 			if (closeEverything) {
-				stopService();
+				TorchActivityService.keepRunning = false;
 				if (!activityCheck) {
 					finish();
 				}
