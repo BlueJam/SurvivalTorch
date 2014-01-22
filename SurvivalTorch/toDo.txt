@@ -15,6 +15,4 @@ Option to leave light on after you close the app
 if this option is chosen then:
 Icon shown in Notification Bar to stop light or open app
 
-Service needs to start when the light / SOS is turned on and stop when they are stopped,
-either in app or from the Notification.
-
+Show the light in LUX somewhere on the screen.

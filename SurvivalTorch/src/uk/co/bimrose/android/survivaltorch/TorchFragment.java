@@ -4,24 +4,23 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
-public class TorchFragment extends SherlockFragment implements
-		View.OnClickListener {
+public class TorchFragment extends SherlockFragment implements View.OnClickListener {
 
 	Button buttonFull;
 	Button buttonSos;
@@ -43,45 +42,41 @@ public class TorchFragment extends SherlockFragment implements
 	boolean isThereALightSensor;
 	boolean running = false;
 
-	public static float lightLevel;
-
 	AlertResetListener alertResetListener;
 	BatteryLowListener bLListener;
 	ServiceListener sListener;
 
+	int x;
+
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		// This makes sure that the container activity has implemented
-		// the callback interface. If not, it throws an exception
+
+		// Makes sure that the container activity has implemented the callback interface
 		try {
 			alertResetListener = (AlertResetListener) activity;
 		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString()
-					+ " must implement AlertReset");
+			throw new ClassCastException(activity.toString() + " must implement AlertReset");
 		}
 
 		// and the battery low listener as well
 		try {
 			bLListener = (BatteryLowListener) activity;
 		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString()
-					+ " must implement BatteryLowListener");
+			throw new ClassCastException(activity.toString() + " must implement BatteryLowListener");
 		}
-		
-		//start / stop service
+
+		// start / stop service
 		try {
 			sListener = (ServiceListener) activity;
 		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString()
-					+ " must implement ServiceListener");
+			throw new ClassCastException(activity.toString() + " must implement ServiceListener");
 		}
-		
+
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup parent,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View result = inflater.inflate(R.layout.torchfrag, parent, false);
 
 		buttonFull = (Button) result.findViewById(R.id.button_full);
@@ -100,74 +95,61 @@ public class TorchFragment extends SherlockFragment implements
 		return (result);
 	}
 
-
 	@Override
 	public void onResume() {
 		super.onResume();
+		getPreferences();
+	}
 
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(getActivity());
+	@Override
+	public void onClick(View view) {
+		alertResetListener.alertReset();
+		buttonStop.setEnabled(true);
+		switch (view.getId()) {
+		case R.id.button_full:
+			sListener.startService("on");
+			buttonFull.setEnabled(false);
+			buttonSos.setEnabled(true);
+			buttonSosPreset.setEnabled(true);
+			break;
+		case R.id.button_sos:
+			sListener.startService("sos");
+			buttonFull.setEnabled(true);
+			buttonSos.setEnabled(false);
+			buttonSosPreset.setEnabled(true);
+			break;
+		case R.id.button_sos_preset:
+			sListener.startService("sosPreset");
+			buttonFull.setEnabled(true);
+			buttonSos.setEnabled(true);
+			buttonSosPreset.setEnabled(false);
+			break;
+		case R.id.button_stop:
+			sListener.stopService();
+			buttonFull.setEnabled(true);
+			buttonSos.setEnabled(true);
+			buttonSosPreset.setEnabled(true);
+			break;
+		default:
+			throw new RuntimeException("Unknown button ID");
+		}
+	}
 
+	private void getPreferences() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		loopXTimes = Integer.valueOf(prefs.getString("loopxtimes", "1"));
-		timeBetweenSignals = Integer.valueOf(prefs.getString(
-				"timebetweenloops", "5"));
+		timeBetweenSignals = Integer.valueOf(prefs.getString("timebetweenloops", "5"));
 		sosSpeed = Integer.valueOf(prefs.getString("sosspeed", "500"));
-
+		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity", "1000000"));
 		message.setText("");
-		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity",
-				"1000000"));
-
 		if (lightSensitivity < 1000) {
 			if (!isThereALightSensor) {
 				message.setText("Sorry, you don't have a light sensor");
 				prefs.edit().remove("lightSensitivity").commit();
 			}
 		}
-
 		batteryPct = Integer.valueOf(prefs.getString("batterypct", "50"));
 	}
-
-	@Override
-	public void onClick(View view) {
-
-		switch (view.getId()) {
-		case R.id.button_full:
-			//stop any service already running
-			sListener.stopService();
-			//start service
-			sListener.startService("on");
-			buttonFull.setEnabled(false);
-			try {
-				Thread.sleep(400);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			buttonStop.setEnabled(true);
-			break;
-		case R.id.button_sos:
-			sListener.stopService();
-			sListener.startService("sos");
-			break;
-		case R.id.button_sos_preset:
-			sListener.startService("sosPreset");
-			break;
-		case R.id.button_stop:
-			buttonStop.setEnabled(false);
-			//stop service
-			sListener.stopService();
-			try {
-				Thread.sleep(400);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			buttonFull.setEnabled(true);
-			break;
-		default:
-			throw new RuntimeException("Unknown button ID");
-		}
-
-	}
-
 
 	public void setBatteryMessage(int pct) {
 		batteryMessage.setText(Integer.toString(pct));
@@ -185,11 +167,11 @@ public class TorchFragment extends SherlockFragment implements
 	public interface BatteryLowListener {
 		public void onLowBattery();
 	}
-	
+
 	// Container Activity must implement this interface
 	public interface ServiceListener {
 		public void startService(String s);
+
 		public void stopService();
 	}
-
 }

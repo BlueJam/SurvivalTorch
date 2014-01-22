@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
@@ -23,11 +24,14 @@ public class LightFragment extends SherlockFragment implements
 	Context mContext;
 	boolean isThereALightSensor;
 	String loopUntilLight;
-	
+
 	SharedPreferences prefsEdit;
 
 	DaytimeListener dTListener;
 	LightSensorListener lSListener;
+
+	SharedPreferences prefs;
+	int lightSensitivity;
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -40,38 +44,59 @@ public class LightFragment extends SherlockFragment implements
 			throw new ClassCastException(activity.toString()
 					+ " must implement DaytimeListener");
 		}
-		
+
 		try {
 			lSListener = (LightSensorListener) activity;
 		} catch (ClassCastException e) {
 			throw new ClassCastException(activity.toString()
 					+ " must implement LightSensorListener");
 		}
+		
+		// check for light sensor on the device
+		sensorCheck();
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent,
 			Bundle savedInstanceState) {
 		View result = inflater.inflate(R.layout.torchfrag, parent, false);
-
-		// check for light sensor on the device
-		sensorCheck();
+		//only do this if there is a light sensor
+		//********needs doing************
+		registerLightSensor();
+		
 		return (result);
 	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		if(isThereALightSensor){
+	
+	public void registerLightSensor() {
+		if (isThereALightSensor) {
 			mSensorManager.registerListener(this, mLight,
 					SensorManager.SENSOR_DELAY_NORMAL);
 		}
 	}
 
+	public void unregisterLightSensor() {
+		if (isThereALightSensor) {
+			mSensorManager.unregisterListener(this);
+		}
+	}
+	
+		@Override
+	public void onResume() {
+		super.onResume();
+		//gets the lightsensitivity in case the user has changed it in prefs
+		prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity","1"));
+	}
+
 	@Override
 	public void onPause() {
 		super.onPause();
-		if(isThereALightSensor){
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		if (isThereALightSensor) {
 			mSensorManager.unregisterListener(this);
 		}
 	}
@@ -84,21 +109,15 @@ public class LightFragment extends SherlockFragment implements
 	@Override
 	public void onSensorChanged(SensorEvent event) {
 		// triggered whenever the light sensor value changes
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(getActivity());
-		int lightSensitivity = Integer.valueOf(prefs.getString(
-				"lightsensitivity", "1"));
-
 		float lux = event.values[0];
-		// Sends a message to the hosting Activity including the light value
-		// and the value the user has chosen
+		//toast(Float.toString(lux));
+		// Sends a message to the hosting Activity
 		dTListener.onlightChanged(lux, lightSensitivity);
 	}
 
 	public void sensorCheck() {
 		mSensorManager = (SensorManager) getActivity().getSystemService(
 				Context.SENSOR_SERVICE);
-		
 		if (mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null) {
 			// Yep, light sensor present
 			isThereALightSensor = true;
@@ -110,27 +129,26 @@ public class LightFragment extends SherlockFragment implements
 			updateLightSensorStatus();
 		}
 	}
-	
-	public void updateLightSensorStatus(){
-		//let the TorchFragment know there is a light sensor
+
+	public void updateLightSensorStatus() {
+		// let the TorchFragment know there is a light sensor
 		lSListener.lightSensorCheck(isThereALightSensor);
 	}
-	
+
 	// Container Activity must implement this interface
 	public interface DaytimeListener {
 		public void onlightChanged(float lux, int lightSensitivity);
 	}
-	
+
 	// Container Activity must implement this interface
 	public interface LightSensorListener {
 		public void lightSensorCheck(boolean isThereALightSensor);
 	}
 
-	/**
-	 * Need to decouple this from the TorchFragment easy enough to do, just
-	 * create it's own boolean value to check on for the stuff in this fragment,
-	 * then pass the value via an interface to the Avtivity which then passes
-	 * the value up to the TorchFragment for use later.
-	 */
+	
+	public void toast(String toastMsg) {
+		Toast.makeText(getActivity(), toastMsg, Toast.LENGTH_SHORT)
+				.show();
+	}
 
 }
