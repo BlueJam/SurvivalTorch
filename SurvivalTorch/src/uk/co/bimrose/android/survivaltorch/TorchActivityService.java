@@ -31,9 +31,9 @@ public class TorchActivityService extends IntentService {
 	Camera cam = null;
 	Parameters p = null;
 	PowerManager powerManager;
+	
 	boolean screenOn = true;
-	Uri notification;
-	Ringtone r;
+	
 	int loopXTimes;
 	int sosSpeed;
 	int timeBetweenSignals;
@@ -42,7 +42,7 @@ public class TorchActivityService extends IntentService {
 
 	String click;
 	SharedPreferences prefs;
-	//public static boolean keepRunning;
+	private boolean keepRunning;
 
 	private Handler handler;
 
@@ -53,12 +53,13 @@ public class TorchActivityService extends IntentService {
 	@Override
 	public void onCreate() {
 		getCamera();
+		//keepRunning = true;
 		super.onCreate();
 	}
 
 	@Override
 	public void onDestroy() {
-		TorchActivity.keepRunning = false;
+		keepRunning = false;
 		stopFlash();
 		releaseCamera();
 		super.onDestroy();
@@ -66,27 +67,25 @@ public class TorchActivityService extends IntentService {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		handler = new Handler();
+		LocalBroadcastManager.getInstance(this).registerReceiver(stopServiceReciever, new IntentFilter("stopServiceBroadcast"));
 
-		LocalBroadcastManager.getInstance(this).registerReceiver(lightChangeReceiver, new IntentFilter("lightChange"));
+		handler = new Handler();
 
 		return super.onStartCommand(intent, flags, startId);
 	}
 
 	@Override
 	public void onHandleIntent(Intent i) {
-		getPreferences();
-
-		stopFlash();
-
+		keepRunning = true;
 		Bundle extras = i.getExtras();
 		if (extras != null) {
 			click = extras.getString("click");
 		}
 
+		getPreferences();
+		stopFlash();
 		raiseNotification();
 
-		TorchActivity.keepRunning = true;
 		// how did we get here? button clicks.
 		if (click.equals("on")) {
 			lightOn();
@@ -96,33 +95,29 @@ public class TorchActivityService extends IntentService {
 			sosLoop(loopXTimes);
 		}
 	}
-	
-	/**
-	public void strobe(){
-		while (TorchActivity.keepRunning){
-			startFlash();
-			stopFlash();
-		}
-	}**/
 
-	private BroadcastReceiver lightChangeReceiver = new BroadcastReceiver() {
+	/**
+	 * public void strobe(){ while (TorchActivity.keepRunning){ startFlash(); stopFlash(); } }
+	 **/
+	
+	private BroadcastReceiver stopServiceReciever = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// Extract data included in the Intent
-			boolean dayLight = intent.getBooleanExtra("dayLight", false);
-			if (dayLight) {
-				TorchActivity.keepRunning = false;
+			boolean stopService = intent.getBooleanExtra("stopService", false);
+			if (stopService) {
+				keepRunning = false;
 			}
 		}
 	};
 
 	public void lightOn() {
 		// loop through checking if the screen has been turned off
-		while (TorchActivity.keepRunning) {
+		while (keepRunning) {
 			// build the torch here with the values above
 			startFlash();
 			while (screenOn) {
-				if (!TorchActivity.keepRunning)
+				if (!keepRunning)
 					break;
 				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 				if (!powerManager.isScreenOn() && (powerManager.isScreenOn() != screenOn)) {
@@ -130,11 +125,16 @@ public class TorchActivityService extends IntentService {
 					stopFlash();
 					// sleep to let the camera be turned off properly
 					// without this the light didn't always come back on
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 					startFlash();
 				}
 			}
 			while (!screenOn) {
-				if (!TorchActivity.keepRunning)
+				if (!keepRunning)
 					break;
 				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 				if (powerManager.isScreenOn() && (powerManager.isScreenOn() != screenOn)) {
@@ -146,7 +146,7 @@ public class TorchActivityService extends IntentService {
 
 	public void sosLoop(int times) {
 		for (int x = 0; x < times; x++) {
-			if (!TorchActivity.keepRunning)
+			if (!keepRunning)
 				break;
 			try {
 				for (int i = 0; i < 9; i++) {
@@ -155,19 +155,19 @@ public class TorchActivityService extends IntentService {
 					if (i > 2 && i < 6) {
 						flashOn = sosSpeed * 3;
 					}
-					if (!TorchActivity.keepRunning)
+					if (!keepRunning)
 						break;
 					startFlash();
 					Thread.sleep(flashOn);
-					toast("TA.KR = "+TorchActivity.keepRunning);
-					if (!TorchActivity.keepRunning)
+					toast("TA.KR = " + keepRunning);
+					if (!keepRunning)
 						break;
 					stopFlash();
 					Thread.sleep(sleepTime);
-					if (!TorchActivity.keepRunning)
+					if (!keepRunning)
 						break;
 				}
-				if (!TorchActivity.keepRunning)
+				if (!keepRunning)
 					break;
 				Thread.sleep(timeBetweenSignals * 1000);
 			} catch (InterruptedException e) {
@@ -178,29 +178,21 @@ public class TorchActivityService extends IntentService {
 
 	private void raiseNotification() {
 		NotificationCompat.Builder b = new NotificationCompat.Builder(this);
-
 		b.setAutoCancel(true).setWhen(System.currentTimeMillis());
 		Intent i = new Intent(this, TorchActivity.class);
 		Bundle bundle = new Bundle();
 		bundle.putBoolean("closeActivity", true);
-		// this clears the stack (I think!) and stops the TorchActivity opening
-		// up again once finish() has been called on it
+		// this clears the stack (I think!) and stops the TorchActivity opening up again once finish() has been called
 		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		i.putExtras(bundle);
-		// FLAG_CANCEL_CURRENT is needed to preserve the Extras added to the
-		// PendingIntent
+		// FLAG_CANCEL_CURRENT is needed to preserve the Extras added to the PendingIntent
 		b.setContentIntent(PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_CANCEL_CURRENT));
 		// The code: new Intent() opens a blank intent (I think)
-		// b.setContentIntent(PendingIntent.getActivity(this, 0, new
-		// Intent(),0));
-
+		// b.setContentIntent(PendingIntent.getActivity(this, 0, new Intent(),0));
 		b.setContentTitle(getString(R.string.app_name)).setContentText("Grrrrrrrrrrrrrrrrrr")
 				.setSmallIcon(android.R.drawable.stat_sys_download).setTicker(getString(R.string.turntorchoff));
-
 		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
 		mgr.notify(NOTIFY_ID, b.build());
-
 	}
 
 	public void getPreferences() {
@@ -226,7 +218,6 @@ public class TorchActivityService extends IntentService {
 
 	public void startFlash() {
 		if (!TorchActivity.lightOn) {
-			// Need to sort this logic out!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			p.setFlashMode(Parameters.FLASH_MODE_TORCH);
 			cam.setParameters(p);
 			cam.startPreview();

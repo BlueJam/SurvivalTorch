@@ -43,7 +43,6 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 	boolean running = false;
 
 	AlertResetListener alertResetListener;
-	BatteryLowListener bLListener;
 	ServiceListener sListener;
 
 	int x;
@@ -57,13 +56,6 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 			alertResetListener = (AlertResetListener) activity;
 		} catch (ClassCastException e) {
 			throw new ClassCastException(activity.toString() + " must implement AlertReset");
-		}
-
-		// and the battery low listener as well
-		try {
-			bLListener = (BatteryLowListener) activity;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString() + " must implement BatteryLowListener");
 		}
 
 		// start / stop service
@@ -134,6 +126,13 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 			throw new RuntimeException("Unknown button ID");
 		}
 	}
+	
+	public void resetButtons(){
+		buttonFull.setEnabled(true);
+		buttonSos.setEnabled(true);
+		buttonSosPreset.setEnabled(true);
+		buttonStop.setEnabled(true);
+	}
 
 	private void getPreferences() {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -151,21 +150,9 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 		batteryPct = Integer.valueOf(prefs.getString("batterypct", "50"));
 	}
 
-	public void setBatteryMessage(int pct) {
-		batteryMessage.setText(Integer.toString(pct));
-		if (pct <= batteryPct) {
-			bLListener.onLowBattery();
-		}
-	}
-
 	// Container Activity must implement this interface
 	public interface AlertResetListener {
 		public void alertReset();
-	}
-
-	// Container Activity must implement this interface
-	public interface BatteryLowListener {
-		public void onLowBattery();
 	}
 
 	// Container Activity must implement this interface

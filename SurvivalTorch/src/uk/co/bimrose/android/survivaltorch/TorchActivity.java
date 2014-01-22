@@ -19,8 +19,8 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 public class TorchActivity extends SherlockFragmentActivity implements LightFragment.DaytimeListener,
-		TorchFragment.BatteryLowListener, TorchFragment.AlertResetListener, BatteryFragment.BatteryChargeListener,
-		LightFragment.LightSensorListener, TorchFragment.ServiceListener {
+		TorchFragment.AlertResetListener, LightFragment.LightSensorListener, TorchFragment.ServiceListener,
+		BatteryFragment.AutoStopCleanup, LightFragment.AutoStopCleanup {
 
 	boolean keepScreenOn = false;
 	private TorchFragment torchFrag = null;
@@ -30,9 +30,8 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 	private boolean soundAlert = false;
 	boolean closeEverything = false;
 	Intent i;
-	
+
 	public static boolean lightOn;
-	public static boolean keepRunning;
 
 	SharedPreferences prefsEdit;
 	String activityRunning;
@@ -42,7 +41,6 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		// have they selected to keep the screen on?
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean activityCheck = prefs.getBoolean("activityrunning", true);
 
@@ -52,7 +50,7 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		if (extras != null) {
 			closeEverything = extras.getBoolean("closeActivity");
 			if (closeEverything) {
-				keepRunning = false;
+				stopServiceBroadcast();
 				if (!activityCheck) {
 					finish();
 				}
@@ -91,10 +89,6 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		activityOpen(true);
 	}
 
-	public void toast(String toastMsg) {
-		Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_SHORT).show();
-	}
-
 	public void activityOpen(boolean b) {
 		prefsEdit.edit().putBoolean("activityrunning", b).commit();
 	}
@@ -120,19 +114,22 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 	@Override
 	public void onlightChanged(float lux, int lightSensitivity) {
 		torchFrag.message.setText("LUX = " + Float.toString(lux));
-		if (lightSensitivity < 1000) {
-			if (lux >= lightSensitivity) {
-				sendChange();
-				CancelNotification(TorchActivity.this, TorchActivityService.NOTIFY_ID);
-				playNotification();
-				enableScreenTimeout();
-			}
-		}
 	}
 
-	private void sendChange() {
-		Intent intent = new Intent("lightChange");
-		intent.putExtra("dayLight", true);
+	@Override
+	public void autoStopCleanup() {
+		//used when the transmition is interrupted by the light or battery sensor.
+		stopServiceBroadcast();
+		CancelNotification(TorchActivity.this, TorchActivityService.NOTIFY_ID);
+		playNotification();
+		enableScreenTimeout();
+		torchFrag.resetButtons();
+	}
+
+	// Picked up by the TorchActivityService
+	private void stopServiceBroadcast() {
+		Intent intent = new Intent("stopServiceBroadcast");
+		intent.putExtra("stopService", true);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 	}
 
@@ -154,21 +151,7 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 
 	@Override
 	public void alertReset() {
-		// lets the alert be used again, called by the TorchFragment when one of the buttons is pressed
 		soundAlert = true;
-	}
-
-	@Override
-	// sets the battery percentage
-	public void batteryCharge(int pct) {
-		torchFrag.setBatteryMessage(pct);
-	}
-
-	@Override
-	public void onLowBattery() {
-		CancelNotification(TorchActivity.this, TorchActivityService.NOTIFY_ID);
-		enableScreenTimeout();
-		playNotification();
 	}
 
 	@Override
@@ -187,14 +170,9 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		this.startService(i);
 	}
 
-	//An array to store all of the previous services? run through and kill them all?
 	@Override
 	public void stopService() {
-		if (i != null) {
-			keepRunning = false;
-			//stopService(i);
-			i = null;
-		}
+		stopServiceBroadcast();
 		CancelNotification(this, TorchActivityService.NOTIFY_ID);
 	}
 
@@ -239,4 +217,5 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		activityOpen(false);
 		CancelNotification(this, TorchActivityService.NOTIFY_ID);
 	}
+
 }

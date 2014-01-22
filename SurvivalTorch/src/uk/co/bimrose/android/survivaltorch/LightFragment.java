@@ -16,8 +16,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
-public class LightFragment extends SherlockFragment implements
-		SensorEventListener {
+public class LightFragment extends SherlockFragment implements SensorEventListener {
 
 	private SensorManager mSensorManager;
 	private Sensor mLight;
@@ -32,6 +31,8 @@ public class LightFragment extends SherlockFragment implements
 
 	SharedPreferences prefs;
 	int lightSensitivity;
+	
+	AutoStopCleanup autoStopCleanup;
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -41,15 +42,19 @@ public class LightFragment extends SherlockFragment implements
 		try {
 			dTListener = (DaytimeListener) activity;
 		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString()
-					+ " must implement DaytimeListener");
+			throw new ClassCastException(activity.toString() + " must implement DaytimeListener");
 		}
 
 		try {
 			lSListener = (LightSensorListener) activity;
 		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString()
-					+ " must implement LightSensorListener");
+			throw new ClassCastException(activity.toString() + " must implement LightSensorListener");
+		}
+		
+		try {
+			autoStopCleanup = (AutoStopCleanup) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString() + " must implement AlertReset");
 		}
 		
 		// check for light sensor on the device
@@ -57,20 +62,18 @@ public class LightFragment extends SherlockFragment implements
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup parent,
-			Bundle savedInstanceState) {
-		View result = inflater.inflate(R.layout.torchfrag, parent, false);
-		//only do this if there is a light sensor
-		//********needs doing************
+	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+		View result = inflater.inflate(R.layout.lightfrag, parent, false);
+		// only do this if there is a light sensor
+		// ********needs doing************
 		registerLightSensor();
-		
+
 		return (result);
 	}
-	
+
 	public void registerLightSensor() {
 		if (isThereALightSensor) {
-			mSensorManager.registerListener(this, mLight,
-					SensorManager.SENSOR_DELAY_NORMAL);
+			mSensorManager.registerListener(this, mLight, SensorManager.SENSOR_DELAY_NORMAL);
 		}
 	}
 
@@ -79,13 +82,13 @@ public class LightFragment extends SherlockFragment implements
 			mSensorManager.unregisterListener(this);
 		}
 	}
-	
-		@Override
+
+	@Override
 	public void onResume() {
 		super.onResume();
-		//gets the lightsensitivity in case the user has changed it in prefs
+		// gets the lightsensitivity in case the user has changed it in prefs
 		prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity","1"));
+		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity", "1"));
 	}
 
 	@Override
@@ -110,14 +113,16 @@ public class LightFragment extends SherlockFragment implements
 	public void onSensorChanged(SensorEvent event) {
 		// triggered whenever the light sensor value changes
 		float lux = event.values[0];
-		//toast(Float.toString(lux));
-		// Sends a message to the hosting Activity
 		dTListener.onlightChanged(lux, lightSensitivity);
+		if (lightSensitivity < 1000) {
+			if (lux >= lightSensitivity) {
+				autoStopCleanup.autoStopCleanup();
+			}
+		}
 	}
 
 	public void sensorCheck() {
-		mSensorManager = (SensorManager) getActivity().getSystemService(
-				Context.SENSOR_SERVICE);
+		mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
 		if (mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) != null) {
 			// Yep, light sensor present
 			isThereALightSensor = true;
@@ -145,10 +150,13 @@ public class LightFragment extends SherlockFragment implements
 		public void lightSensorCheck(boolean isThereALightSensor);
 	}
 
-	
 	public void toast(String toastMsg) {
-		Toast.makeText(getActivity(), toastMsg, Toast.LENGTH_SHORT)
-				.show();
+		Toast.makeText(getActivity(), toastMsg, Toast.LENGTH_SHORT).show();
 	}
-
+	
+	// Container Activity must implement this interface
+	public interface AutoStopCleanup {
+		public void autoStopCleanup();
+	}
+	
 }
