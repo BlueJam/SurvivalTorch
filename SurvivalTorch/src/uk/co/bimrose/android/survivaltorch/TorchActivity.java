@@ -32,6 +32,8 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 	Intent i;
 
 	public static boolean lightOn;
+	public static boolean keepRunning;
+	public static boolean running = false;
 
 	SharedPreferences prefsEdit;
 	String activityRunning;
@@ -50,7 +52,7 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		if (extras != null) {
 			closeEverything = extras.getBoolean("closeActivity");
 			if (closeEverything) {
-				stopServiceBroadcast();
+				keepRunning = false;;
 				if (!activityCheck) {
 					finish();
 				}
@@ -119,18 +121,10 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 	@Override
 	public void autoStopCleanup() {
 		// used when the transmition is interrupted by the light or battery sensor.
-		stopServiceBroadcast();
+		keepRunning = false;
 		CancelNotification(TorchActivity.this, TorchActivityService.NOTIFY_ID);
 		playNotification();
 		enableScreenTimeout();
-		torchFrag.resetButtons();
-	}
-
-	// Picked up by the TorchActivityService
-	private void stopServiceBroadcast() {
-		Intent intent = new Intent("stopServiceBroadcast");
-		intent.putExtra("stopService", true);
-		LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 	}
 
 	public void playNotification() {
@@ -172,7 +166,6 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 
 	@Override
 	public void stopService() {
-		stopServiceBroadcast();
 		CancelNotification(this, TorchActivityService.NOTIFY_ID);
 	}
 

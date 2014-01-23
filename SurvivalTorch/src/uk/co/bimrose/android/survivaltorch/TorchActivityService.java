@@ -42,7 +42,6 @@ public class TorchActivityService extends IntentService {
 
 	String click;
 	SharedPreferences prefs;
-	private boolean keepRunning;
 
 	private Handler handler;
 
@@ -59,7 +58,6 @@ public class TorchActivityService extends IntentService {
 
 	@Override
 	public void onDestroy() {
-		keepRunning = false;
 		stopFlash();
 		releaseCamera();
 		super.onDestroy();
@@ -67,8 +65,6 @@ public class TorchActivityService extends IntentService {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		LocalBroadcastManager.getInstance(this).registerReceiver(stopServiceReciever,
-				new IntentFilter("stopServiceBroadcast"));
 
 		handler = new Handler();
 
@@ -77,7 +73,11 @@ public class TorchActivityService extends IntentService {
 
 	@Override
 	public void onHandleIntent(Intent i) {
-		keepRunning = true;
+
+		if (TorchFragment.z <= 1) {
+			TorchActivity.keepRunning = true;
+		}
+
 		Bundle extras = i.getExtras();
 		if (extras != null) {
 			click = extras.getString("click");
@@ -95,30 +95,20 @@ public class TorchActivityService extends IntentService {
 		} else if (click.equals("sosPreset")) {
 			sosLoop(loopXTimes);
 		}
+		TorchFragment.z--;
 	}
 
 	/**
 	 * public void strobe(){ while (TorchActivity.keepRunning){ startFlash(); stopFlash(); } }
 	 **/
 
-	private BroadcastReceiver stopServiceReciever = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// Extract data included in the Intent
-			boolean stopService = intent.getBooleanExtra("stopService", false);
-			if (stopService) {
-				keepRunning = false;
-			}
-		}
-	};
-
 	public void lightOn() {
 		// loop through checking if the screen has been turned off
-		while (keepRunning) {
+		while (TorchActivity.keepRunning) {
 			// build the torch here with the values above
 			startFlash();
 			while (screenOn) {
-				if (!keepRunning)
+				if (!TorchActivity.keepRunning)
 					break;
 				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 				if (!powerManager.isScreenOn() && (powerManager.isScreenOn() != screenOn)) {
@@ -135,7 +125,7 @@ public class TorchActivityService extends IntentService {
 				}
 			}
 			while (!screenOn) {
-				if (!keepRunning)
+				if (!TorchActivity.keepRunning)
 					break;
 				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 				if (powerManager.isScreenOn() && (powerManager.isScreenOn() != screenOn)) {
@@ -147,7 +137,7 @@ public class TorchActivityService extends IntentService {
 
 	public void sosLoop(int times) {
 		for (int x = 0; x < times; x++) {
-			if (!keepRunning)
+			if (!TorchActivity.keepRunning)
 				break;
 			try {
 				for (int i = 0; i < 9; i++) {
@@ -156,18 +146,18 @@ public class TorchActivityService extends IntentService {
 					if (i > 2 && i < 6) {
 						flashOn = sosSpeed * 3;
 					}
-					if (!keepRunning)
+					if (!TorchActivity.keepRunning)
 						break;
 					startFlash();
 					Thread.sleep(flashOn);
-					if (!keepRunning)
+					if (!TorchActivity.keepRunning)
 						break;
 					stopFlash();
 					Thread.sleep(sleepTime);
-					if (!keepRunning)
+					if (!TorchActivity.keepRunning)
 						break;
 				}
-				if (!keepRunning)
+				if (!TorchActivity.keepRunning)
 					break;
 				Thread.sleep(timeBetweenSignals * 1000);
 			} catch (InterruptedException e) {

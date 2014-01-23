@@ -41,6 +41,8 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 	int sosSpeed = 500;
 	boolean isThereALightSensor;
 	boolean running = false;
+	
+	public static int z;
 
 	AlertResetListener alertResetListener;
 	ServiceListener sListener;
@@ -75,7 +77,6 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 		buttonSos = (Button) result.findViewById(R.id.button_sos);
 		buttonSosPreset = (Button) result.findViewById(R.id.button_sos_preset);
 		buttonStop = (Button) result.findViewById(R.id.button_stop);
-		buttonStop.setEnabled(false);
 		message = (TextView) result.findViewById(R.id.message);
 		batteryMessage = (TextView) result.findViewById(R.id.batterymessage);
 
@@ -96,42 +97,26 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 	@Override
 	public void onClick(View view) {
 		alertResetListener.alertReset();
-		buttonStop.setEnabled(true);
+		TorchActivity.keepRunning = false;
 		switch (view.getId()) {
 		case R.id.button_full:
+			z++;
 			sListener.startService("on");
-			buttonFull.setEnabled(false);
-			buttonSos.setEnabled(true);
-			buttonSosPreset.setEnabled(true);
 			break;
 		case R.id.button_sos:
+			z++;
 			sListener.startService("sos");
-			buttonFull.setEnabled(true);
-			buttonSos.setEnabled(false);
-			buttonSosPreset.setEnabled(true);
 			break;
 		case R.id.button_sos_preset:
+			z++;TorchActivity.keepRunning = false;TorchActivity.keepRunning = false;
 			sListener.startService("sosPreset");
-			buttonFull.setEnabled(true);
-			buttonSos.setEnabled(true);
-			buttonSosPreset.setEnabled(false);
 			break;
 		case R.id.button_stop:
 			sListener.stopService();
-			buttonFull.setEnabled(true);
-			buttonSos.setEnabled(true);
-			buttonSosPreset.setEnabled(true);
 			break;
 		default:
 			throw new RuntimeException("Unknown button ID");
 		}
-	}
-	
-	public void resetButtons(){
-		buttonFull.setEnabled(true);
-		buttonSos.setEnabled(true);
-		buttonSosPreset.setEnabled(true);
-		buttonStop.setEnabled(true);
 	}
 
 	private void getPreferences() {
