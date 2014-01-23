@@ -8,6 +8,8 @@
     <string name="button_sos_preset">SOS Preset</string>
     <string name="button_stop">Off</string>
     <string name="settings">Settings</string>
+    <string name="autoontitle">Auto-On</string>
+    <string name="autoonsummary">Turns the main torch on as soon as you open the app</string>
     <string name="loopxtimestitle">Loop x</string>
     <string name="loopxtimessummary">Send the SOS x times</string>
     <string name="sosspeedtitle">Signal speed</string>

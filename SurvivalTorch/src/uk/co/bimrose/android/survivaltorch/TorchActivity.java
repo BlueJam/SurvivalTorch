@@ -44,7 +44,7 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean activityCheck = prefs.getBoolean("activityrunning", true);
-
+		boolean autoOn = Boolean.valueOf(prefs.getBoolean("autoon", false));
 		// this means that the Notification has been clicked to stop the service it also closes this activity so the app
 		// is no longer running
 		Bundle extras = getIntent().getExtras();
@@ -56,8 +56,16 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 					finish();
 				}
 			}
+			//makes sure the torch only gets turned on the first time the activity is created
+			autoOn = false;
 		}
-
+		
+		if (autoOn) {
+			startService("on");
+			TorchFragment.serviceCount++;
+			autoOn = false;
+		}
+		
 		keepScreenOn = Boolean.valueOf(prefs.getBoolean("keepscreenon", false));
 		if (keepScreenOn) {
 			// stops main screen closing

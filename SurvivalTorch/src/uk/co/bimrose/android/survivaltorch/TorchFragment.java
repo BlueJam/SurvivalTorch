@@ -42,6 +42,8 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 	boolean isThereALightSensor;
 	boolean running = false;
 	
+	SharedPreferences prefs;
+
 	public static int serviceCount;
 
 	AlertResetListener alertResetListener;
@@ -87,7 +89,7 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 
 		return (result);
 	}
-
+ 
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -120,7 +122,7 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 	}
 
 	private void getPreferences() {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		loopXTimes = Integer.valueOf(prefs.getString("loopxtimes", "1"));
 		timeBetweenSignals = Integer.valueOf(prefs.getString("timebetweenloops", "5"));
 		sosSpeed = Integer.valueOf(prefs.getString("sosspeed", "500"));
