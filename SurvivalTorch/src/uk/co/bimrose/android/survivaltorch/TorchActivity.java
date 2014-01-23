@@ -118,7 +118,7 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 
 	@Override
 	public void autoStopCleanup() {
-		//used when the transmition is interrupted by the light or battery sensor.
+		// used when the transmition is interrupted by the light or battery sensor.
 		stopServiceBroadcast();
 		CancelNotification(TorchActivity.this, TorchActivityService.NOTIFY_ID);
 		playNotification();

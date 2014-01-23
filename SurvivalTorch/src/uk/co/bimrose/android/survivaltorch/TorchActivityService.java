@@ -31,9 +31,9 @@ public class TorchActivityService extends IntentService {
 	Camera cam = null;
 	Parameters p = null;
 	PowerManager powerManager;
-	
+
 	boolean screenOn = true;
-	
+
 	int loopXTimes;
 	int sosSpeed;
 	int timeBetweenSignals;
@@ -53,7 +53,7 @@ public class TorchActivityService extends IntentService {
 	@Override
 	public void onCreate() {
 		getCamera();
-		//keepRunning = true;
+		// keepRunning = true;
 		super.onCreate();
 	}
 
@@ -67,7 +67,8 @@ public class TorchActivityService extends IntentService {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		LocalBroadcastManager.getInstance(this).registerReceiver(stopServiceReciever, new IntentFilter("stopServiceBroadcast"));
+		LocalBroadcastManager.getInstance(this).registerReceiver(stopServiceReciever,
+				new IntentFilter("stopServiceBroadcast"));
 
 		handler = new Handler();
 
@@ -99,7 +100,7 @@ public class TorchActivityService extends IntentService {
 	/**
 	 * public void strobe(){ while (TorchActivity.keepRunning){ startFlash(); stopFlash(); } }
 	 **/
-	
+
 	private BroadcastReceiver stopServiceReciever = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -159,7 +160,6 @@ public class TorchActivityService extends IntentService {
 						break;
 					startFlash();
 					Thread.sleep(flashOn);
-					toast("TA.KR = " + keepRunning);
 					if (!keepRunning)
 						break;
 					stopFlash();
@@ -183,7 +183,7 @@ public class TorchActivityService extends IntentService {
 		Bundle bundle = new Bundle();
 		bundle.putBoolean("closeActivity", true);
 		// this clears the stack (I think!) and stops the TorchActivity opening up again once finish() has been called
-		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		i.putExtras(bundle);
 		// FLAG_CANCEL_CURRENT is needed to preserve the Extras added to the PendingIntent
 		b.setContentIntent(PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_CANCEL_CURRENT));
