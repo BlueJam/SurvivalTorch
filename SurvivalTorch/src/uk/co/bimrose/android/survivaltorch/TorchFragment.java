@@ -42,7 +42,7 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 	boolean isThereALightSensor;
 	boolean running = false;
 	
-	public static int z;
+	public static int serviceCount;
 
 	AlertResetListener alertResetListener;
 	ServiceListener sListener;
@@ -100,15 +100,15 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 		TorchActivity.keepRunning = false;
 		switch (view.getId()) {
 		case R.id.button_full:
-			z++;
+			serviceCount++;
 			sListener.startService("on");
 			break;
 		case R.id.button_sos:
-			z++;
+			serviceCount++;
 			sListener.startService("sos");
 			break;
 		case R.id.button_sos_preset:
-			z++;TorchActivity.keepRunning = false;TorchActivity.keepRunning = false;
+			serviceCount++;
 			sListener.startService("sosPreset");
 			break;
 		case R.id.button_stop:

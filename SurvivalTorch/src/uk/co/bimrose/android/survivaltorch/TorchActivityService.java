@@ -74,7 +74,7 @@ public class TorchActivityService extends IntentService {
 	@Override
 	public void onHandleIntent(Intent i) {
 
-		if (TorchFragment.z <= 1) {
+		if (TorchFragment.serviceCount <= 1) {
 			TorchActivity.keepRunning = true;
 		}
 
@@ -95,7 +95,7 @@ public class TorchActivityService extends IntentService {
 		} else if (click.equals("sosPreset")) {
 			sosLoop(loopXTimes);
 		}
-		TorchFragment.z--;
+		TorchFragment.serviceCount--;
 	}
 
 	/**

@@ -29,7 +29,6 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 
 	private boolean soundAlert = false;
 	boolean closeEverything = false;
-	Intent i;
 
 	public static boolean lightOn;
 	public static boolean keepRunning;
@@ -156,7 +155,7 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 	@Override
 	public void startService(String s) {
 		stopService();
-		i = new Intent(this, TorchActivityService.class);
+		Intent i = new Intent(this, TorchActivityService.class);
 		Bundle extras = new Bundle();
 		// which button was clicked
 		extras.putString("click", s);
