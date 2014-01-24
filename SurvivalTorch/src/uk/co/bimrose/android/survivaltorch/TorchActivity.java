@@ -35,37 +35,42 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 	public static boolean running = false;
 
 	SharedPreferences prefsEdit;
+	SharedPreferences prefs;
 	String activityRunning;
+	
+	private boolean nSound;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean activityCheck = prefs.getBoolean("activityrunning", true);
-		boolean autoOn = Boolean.valueOf(prefs.getBoolean("autoon", false));
+		boolean autoOn = prefs.getBoolean("autoon", false);
+
 		// this means that the Notification has been clicked to stop the service it also closes this activity so the app
 		// is no longer running
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			closeEverything = extras.getBoolean("closeActivity");
 			if (closeEverything) {
-				keepRunning = false;;
+				keepRunning = false;
+				;
 				if (!activityCheck) {
 					finish();
 				}
 			}
-			//makes sure the torch only gets turned on the first time the activity is created
+			// makes sure the torch only gets turned on the first time the activity is created
 			autoOn = false;
 		}
-		
+
 		if (autoOn) {
 			startService("on");
 			TorchFragment.serviceCount++;
 			autoOn = false;
 		}
-		
+
 		keepScreenOn = Boolean.valueOf(prefs.getBoolean("keepscreenon", false));
 		if (keepScreenOn) {
 			// stops main screen closing
@@ -95,6 +100,20 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 
 		// the TorchActivity is running!!!
 		prefsEdit = PreferenceManager.getDefaultSharedPreferences(this);
+		activityOpen(true);
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		// toast("start");
+		activityOpen(true);
+	}
+
+	@Override
+	public void onResume() {
+		nSound = prefs.getBoolean("nsound", false);
+		super.onResume();
 		activityOpen(true);
 	}
 
@@ -135,11 +154,13 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 	}
 
 	public void playNotification() {
+		if(nSound){
 		Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		if (soundAlert) {
 			Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 			r.play();
 			soundAlert = false;
+			}
 		}
 	}
 
@@ -180,20 +201,6 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		String ns = Context.NOTIFICATION_SERVICE;
 		NotificationManager nMgr = (NotificationManager) ctx.getSystemService(ns);
 		nMgr.cancel(notifyId);
-	}
-
-	@Override
-	public void onStart() {
-		super.onStart();
-		// toast("start");
-		activityOpen(true);
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		// toast("resume");
-		activityOpen(true);
 	}
 
 	@Override

@@ -39,6 +39,7 @@ public class TorchActivityService extends IntentService {
 	int timeBetweenSignals;
 	int lightSensitivity;
 	int batteryPct;
+	boolean sOLOff;
 
 	String click;
 	SharedPreferences prefs;
@@ -112,16 +113,22 @@ public class TorchActivityService extends IntentService {
 					break;
 				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 				if (!powerManager.isScreenOn() && (powerManager.isScreenOn() != screenOn)) {
-					screenOn = false;
-					stopFlash();
-					// sleep to let the camera be turned off properly
-					// without this the light didn't always come back on
-					try {
-						Thread.sleep(200);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+					// checks to see if the user wants the light left on when the screen is turned off
+					if (sOLOff) {
+						screenOn = false;
+						stopFlash();
+						// sleep to let the camera be turned off properly
+						// without this the light didn't always come back on
+						try {
+							Thread.sleep(200);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						startFlash();
+					} else {
+						TorchActivity.keepRunning = false;
+//***********************Need to close the Notification down from here somehow******************
 					}
-					startFlash();
 				}
 			}
 			while (!screenOn) {
@@ -193,6 +200,8 @@ public class TorchActivityService extends IntentService {
 		timeBetweenSignals = Integer.valueOf(prefs.getString("timebetweenloops", "5"));
 		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity", "1000000"));
 		batteryPct = Integer.valueOf(prefs.getString("batterypct", "50"));
+		sOLOff = prefs.getBoolean("screenofflightoff", true);
+
 	}
 
 	// get camera parameters

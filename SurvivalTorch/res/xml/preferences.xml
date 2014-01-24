@@ -1,32 +1,64 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:empub="http://schemas.android.com/apk/res-auto" >
+
+    <PreferenceCategory
+        android:key="prefkeygeneral"
+        android:title="@string/prefgeneral" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="autoon"
+            android:summary="@string/autoonsummary"
+            android:title="@string/autoontitle" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="screenofflightoff"
+            android:summary="@string/screenofflightoffsummary"
+            android:title="@string/screenofflightofftitle" />
+
+        <ListPreference
+            android:dialogTitle="@string/timerdialogtitle"
+            android:entries="@array/timer"
+            android:entryValues="@array/timer"
+            android:key="timer"
+            android:summary="@string/timersummary"
+            android:title="@string/timertitle" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="keepscreenon"
+            android:summary="@string/keepscreenonsummary"
+            android:title="@string/keepscreenontitle" />
+    </PreferenceCategory>
     
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="autoon"
-        android:summary="@string/autoonsummary"
-        android:title="@string/autoontitle" />
-    <ListPreference
-        android:dialogTitle="@string/loopxtimestitle"
-        android:entries="@array/cycles"
-        android:entryValues="@array/mycycles"
-        android:key="loopxtimes"
-        android:summary="@string/loopxtimessummary"
-        android:title="@string/loopxtimestitle" />
-    <ListPreference
-        android:dialogTitle="@string/timebetweensostitle"
-        android:entries="@array/seconds"
-        android:entryValues="@array/seconds"
-        android:key="timebetweenloops"
-        android:summary="@string/timelbetweensossummary"
-        android:title="@string/timebetweensostitle" />
-    <ListPreference
-        android:dialogTitle="@string/sosspeedtitle"
-        android:entries="@array/speed"
-        android:entryValues="@array/speednumbers"
-        android:key="sosspeed"
-        android:summary="@string/sosspeedsummary"
-        android:title="@string/sosspeedtitle" />
+    <PreferenceCategory
+        android:key="prefkeysos"
+        android:title="@string/prefsos" >
+        <ListPreference
+            android:dialogTitle="@string/loopxtimestitle"
+            android:entries="@array/cycles"
+            android:entryValues="@array/mycycles"
+            android:key="loopxtimes"
+            android:summary="@string/loopxtimessummary"
+            android:title="@string/loopxtimestitle" />
+        <ListPreference
+            android:dialogTitle="@string/timebetweensostitle"
+            android:entries="@array/seconds"
+            android:entryValues="@array/seconds"
+            android:key="timebetweenloops"
+            android:summary="@string/timelbetweensossummary"
+            android:title="@string/timebetweensostitle" />
+        <ListPreference
+            android:dialogTitle="@string/sosspeedtitle"
+            android:entries="@array/speed"
+            android:entryValues="@array/speednumbers"
+            android:key="sosspeed"
+            android:summary="@string/sosspeedsummary"
+            android:title="@string/sosspeedtitle" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="prefkeypowersaver"
+        android:title="@string/prefpowersaver" >
     <ListPreference
         android:dialogTitle="@string/batterypercent"
         android:entries="@array/percentage"
@@ -41,18 +73,22 @@
         android:key="lightsensitivity"
         android:summary="@string/lightsensitivitysummary"
         android:title="@string/lightsensitivitytitle" />
+    </PreferenceCategory>
 
+    <PreferenceCategory
+        android:key="prefkeynotifications"
+        android:title="@string/prefnotifications" >
     <CheckBoxPreference
         android:defaultValue="false"
-        android:key="keepscreenon"
-        android:summary="@string/keepscreenonsummary"
-        android:title="@string/keepscreenontitle" />
+        android:key="notifications"
+        android:summary="@string/notificationssummary"
+        android:title="@string/notificationstitle" />
     <CheckBoxPreference
         android:defaultValue="false"
-        android:dependency="keepscreenon"
-        android:key="forcetimeout"
-        android:summary="@string/forcetimeoutsummary"
-        android:title="@string/forcetimeouttitle" />
+        android:key="nsound"
+        android:summary="@string/nsoundsummary"
+        android:title="@string/nsoundtitle" />
+    </PreferenceCategory>
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="activityrunning" />

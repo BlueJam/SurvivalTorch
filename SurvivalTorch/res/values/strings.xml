@@ -8,24 +8,39 @@
     <string name="button_sos_preset">SOS Preset</string>
     <string name="button_stop">Off</string>
     <string name="settings">Settings</string>
+    
+    <string name="turntorchoff">Turn off from notification bar</string>
+    
+    <string name="prefgeneral">General</string>
+    <string name="prefsos">SOS Settings</string>
+    <string name="prefpowersaver">Power Saving</string>
+    <string name="prefnotifications">Notifications</string>
+    
     <string name="autoontitle">Auto-On</string>
     <string name="autoonsummary">Turns the main torch on as soon as you open the app</string>
+    <string name="timertitle">Timer</string>
+    <string name="timersummary">Turn off in x minutes</string>
+    <string name="timerdialogtitle">Turn the torch off in x minutes time:</string>
     <string name="loopxtimestitle">Loop x</string>
     <string name="loopxtimessummary">Send the SOS x times</string>
-    <string name="sosspeedtitle">Signal speed</string>
+    <string name="sosspeedtitle">Speed</string>
     <string name="sosspeedsummary">Fast or slow SOS signals</string>
-    <string name="timebetweensostitle">SOS frequency</string>
+    <string name="timebetweensostitle">Frequency</string>
     <string name="timelbetweensossummary">Repeat the SOS every x seconds</string>
-    <string name="lightsensitivitytitle">Light sensor</string>
+    <string name="lightsensitivitytitle">Daylight</string>
     <string name="lightsensitivitysummary">Stop sending the SOS as it gets light</string>
     <string name="lightsensitivitydialogtitle">Sensitivity of the light sensor in LUX</string>
     <string name="batterypercent">Stop sending SOS when battery reaches:</string>
     <string name="batterypercentsummary">Stop sending SOS on low battery</string>
-    <string name="batterypercenttitle">Save Power</string>
+    <string name="batterypercenttitle">Low Battery</string>
     <string name="keepscreenontitle">Awake</string>
     <string name="keepscreenonsummary">Keep the screen on</string>
-    <string name="forcetimeouttitle">Force close</string>
-    <string name="forcetimeoutsummary">Let the screen timeout on low battery or daylight</string>
-    <string name="turntorchoff">Turn torch off here</string>
-
+    
+    <string name="nsoundtitle">Alerts</string>
+    <string name="nsoundsummary">Notification sound when the torch is non-manually turned off (Low battery, Daylight or Timer)?</string>
+    <string name="screenofflightofftitle">Imortal Torch</string>
+    <string name="screenofflightoffsummary">Leave the torch on when the screen turns off</string>
+    <string name="notificationstitle">Use Notifications</string>
+    <string name="notificationssummary">Turn torch off from the notification bar</string>
+    
 </resources>
