@@ -34,12 +34,11 @@ public class BatteryFragment extends SherlockFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View result = inflater.inflate(R.layout.torchfrag, parent, false);
 		// need to check if they want to save power on low battery or not, only register if they do***************
 		IntentFilter f = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 		getActivity().registerReceiver(onBattery, f);
 
-		return (result);
+		return (null);
 	}
 
 	public void onResume() {

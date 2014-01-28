@@ -63,12 +63,11 @@ public class LightFragment extends SherlockFragment implements SensorEventListen
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View result = inflater.inflate(R.layout.lightfrag, parent, false);
 		// only do this if there is a light sensor
 		// ********needs doing************
 		registerLightSensor();
 
-		return (result);
+		return (null);
 	}
 
 	public void registerLightSensor() {

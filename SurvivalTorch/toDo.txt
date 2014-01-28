@@ -4,7 +4,11 @@ For cameras where this doesn't work, a super low screen brightness option?
 Set up a few broadcast senders and receivers to see exactly how they work
 
 Timer for the light
+Indicate if it is on!
+Timer countdown shown on screen, good solution
 
 Notification - Turn off from notification bar option?
 
 In preferences, instead of using x minutes etc use the actual number
+
+Make sure none of the fragments would break the app if they werent instanciated.

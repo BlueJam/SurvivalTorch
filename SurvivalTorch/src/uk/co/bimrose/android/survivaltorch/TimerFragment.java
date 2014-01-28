@@ -1,8 +1,5 @@
 package uk.co.bimrose.android.survivaltorch;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -26,8 +23,6 @@ public class TimerFragment extends SherlockFragment {
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 
-		getPreferences();
-
 		// Cleanup service / notification once the timer is done
 		try {
 			autoStopCleanup = (AutoStopCleanup) activity;
@@ -39,7 +34,7 @@ public class TimerFragment extends SherlockFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View result = inflater.inflate(R.layout.timerfrag, parent, false);
-
+		getPreferences();
 		return (result);
 	}
 
@@ -51,24 +46,20 @@ public class TimerFragment extends SherlockFragment {
 	}
 
 	/**
+	 * public void setTimerGoing() { new Timer().schedule(new TimerTask() {
+	 * 
+	 * @Override public void run() { autoStopCleanup.autoStopCleanup(); } }, timer * 10000); }
+	 **/
+
 	public void setTimerGoing() {
-		new Timer().schedule(new TimerTask() {
+		final Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				autoStopCleanup.autoStopCleanup();
 			}
-		}, timer * 10000);
-	}
-	**/
-	
-	public void setTimerGoing() {
-	final Handler handler = new Handler();
-	handler.postDelayed(new Runnable() {
-	  @Override
-	  public void run() {
-		  autoStopCleanup.autoStopCleanup();
-	  }
-	}, timer * 10000);
+		}, timer*3000);
+		//******************************************Needs correcting***********************
 	}
 
 	private void getPreferences() {
