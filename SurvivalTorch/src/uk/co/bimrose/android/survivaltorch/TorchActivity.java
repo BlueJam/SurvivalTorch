@@ -9,9 +9,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -20,19 +18,21 @@ import com.actionbarsherlock.view.MenuItem;
 
 public class TorchActivity extends SherlockFragmentActivity implements LightFragment.DaytimeListener,
 		TorchFragment.AlertResetListener, LightFragment.LightSensorListener, TorchFragment.ServiceListener,
-		BatteryFragment.AutoStopCleanup, LightFragment.AutoStopCleanup {
+		BatteryFragment.AutoStopCleanup, LightFragment.AutoStopCleanup, TimerFragment.AutoStopCleanup {
 
 	boolean keepScreenOn = false;
 	private TorchFragment torchFrag = null;
 	private LightFragment lightFrag = null;
 	private BatteryFragment batteryFrag = null;
+	private TimerFragment timerFrag = null;
 
 	private boolean soundAlert = false;
 	boolean closeEverything = false;
 
 	public static boolean lightOn;
 	public static boolean keepRunning;
-	public static boolean running = false;
+	
+	public boolean timerOn;
 
 	SharedPreferences prefsEdit;
 	SharedPreferences prefs;
@@ -78,24 +78,27 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		}
 
 		torchFrag = (TorchFragment) getSupportFragmentManager().findFragmentById(R.id.torchfrag);
-
 		if (torchFrag == null) {
 			torchFrag = new TorchFragment();
 			getSupportFragmentManager().beginTransaction().add(R.id.torchfrag, torchFrag).commit();
 		}
 
 		lightFrag = (LightFragment) getSupportFragmentManager().findFragmentById(R.id.lightfrag);
-
 		if (lightFrag == null) {
 			lightFrag = new LightFragment();
 			getSupportFragmentManager().beginTransaction().add(R.id.lightfrag, lightFrag).commit();
 		}
 
 		batteryFrag = (BatteryFragment) getSupportFragmentManager().findFragmentById(R.id.batteryfrag);
-
 		if (batteryFrag == null) {
 			batteryFrag = new BatteryFragment();
 			getSupportFragmentManager().beginTransaction().add(R.id.batteryfrag, batteryFrag).commit();
+		}
+		
+		timerFrag = (TimerFragment) getSupportFragmentManager().findFragmentById(R.id.timerfrag);
+		if (timerFrag == null) {
+			timerFrag = new TimerFragment();
+			getSupportFragmentManager().beginTransaction().add(R.id.timerfrag, timerFrag).commit();
 		}
 
 		// the TorchActivity is running!!!
@@ -113,6 +116,7 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 	@Override
 	public void onResume() {
 		nSound = prefs.getBoolean("nsound", false);
+		timerOn = prefs.getBoolean("timeron", false);
 		super.onResume();
 		activityOpen(true);
 	}
@@ -184,6 +188,9 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 	@Override
 	public void startService(String s) {
 		stopService();
+		if(timerOn){
+			timerFrag.setTimerGoing();
+		}
 		Intent i = new Intent(this, TorchActivityService.class);
 		Bundle extras = new Bundle();
 		// which button was clicked

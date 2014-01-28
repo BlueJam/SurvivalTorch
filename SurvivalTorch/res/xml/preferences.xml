@@ -14,22 +14,30 @@
             android:key="screenofflightoff"
             android:summary="@string/screenofflightoffsummary"
             android:title="@string/screenofflightofftitle" />
-
-        <ListPreference
-            android:dialogTitle="@string/timerdialogtitle"
-            android:entries="@array/timer"
-            android:entryValues="@array/timer"
-            android:key="timer"
-            android:summary="@string/timersummary"
-            android:title="@string/timertitle" />
-
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="keepscreenon"
             android:summary="@string/keepscreenonsummary"
             android:title="@string/keepscreenontitle" />
     </PreferenceCategory>
-    
+    <PreferenceCategory
+        android:key="prefkeytimer"
+        android:title="@string/prefkeytimer" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="timeron"
+            android:summary="@string/timeronsummary"
+            android:title="@string/timerontitle" />
+
+        <ListPreference
+            android:dependency="timeron"
+            android:dialogTitle="@string/timerdialogtitle"
+            android:entries="@array/timer"
+            android:entryValues="@array/timer"
+            android:key="timer"
+            android:summary="@string/timersummary"
+            android:title="@string/timertitle" />
+    </PreferenceCategory>
     <PreferenceCategory
         android:key="prefkeysos"
         android:title="@string/prefsos" >
@@ -55,40 +63,39 @@
             android:summary="@string/sosspeedsummary"
             android:title="@string/sosspeedtitle" />
     </PreferenceCategory>
-
     <PreferenceCategory
         android:key="prefkeypowersaver"
         android:title="@string/prefpowersaver" >
-    <ListPreference
-        android:dialogTitle="@string/batterypercent"
-        android:entries="@array/percentage"
-        android:entryValues="@array/cleanpercentage"
-        android:key="batterypct"
-        android:summary="@string/batterypercentsummary"
-        android:title="@string/batterypercenttitle" />
-    <ListPreference
-        android:dialogTitle="@string/lightsensitivitydialogtitle"
-        android:entries="@array/lightsensitivity"
-        android:entryValues="@array/lightsensitivitynumbers"
-        android:key="lightsensitivity"
-        android:summary="@string/lightsensitivitysummary"
-        android:title="@string/lightsensitivitytitle" />
+        <ListPreference
+            android:dialogTitle="@string/batterypercent"
+            android:entries="@array/percentage"
+            android:entryValues="@array/cleanpercentage"
+            android:key="batterypct"
+            android:summary="@string/batterypercentsummary"
+            android:title="@string/batterypercenttitle" />
+        <ListPreference
+            android:dialogTitle="@string/lightsensitivitydialogtitle"
+            android:entries="@array/lightsensitivity"
+            android:entryValues="@array/lightsensitivitynumbers"
+            android:key="lightsensitivity"
+            android:summary="@string/lightsensitivitysummary"
+            android:title="@string/lightsensitivitytitle" />
     </PreferenceCategory>
-
     <PreferenceCategory
         android:key="prefkeynotifications"
         android:title="@string/prefnotifications" >
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="notifications"
-        android:summary="@string/notificationssummary"
-        android:title="@string/notificationstitle" />
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="nsound"
-        android:summary="@string/nsoundsummary"
-        android:title="@string/nsoundtitle" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="notifications"
+            android:summary="@string/notificationssummary"
+            android:title="@string/notificationstitle" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="nsound"
+            android:summary="@string/nsoundsummary"
+            android:title="@string/nsoundtitle" />
     </PreferenceCategory>
+
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="activityrunning" />

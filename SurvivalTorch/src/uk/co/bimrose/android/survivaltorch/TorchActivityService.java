@@ -10,15 +10,12 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
-import android.media.Ringtone;
-import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.widget.Toast;
 
 public class TorchActivityService extends IntentService {
@@ -37,8 +34,6 @@ public class TorchActivityService extends IntentService {
 	int loopXTimes;
 	int sosSpeed;
 	int timeBetweenSignals;
-	int lightSensitivity;
-	int batteryPct;
 	boolean sOLOff;
 
 	String click;
@@ -46,12 +41,19 @@ public class TorchActivityService extends IntentService {
 
 	private Handler handler;
 
+	screenTurnOff sTOff;
+
 	public TorchActivityService() {
 		super("TorchActivityService");
 	}
 
 	@Override
 	public void onCreate() {
+		// register the screen off broadcastreceivers
+		IntentFilter filterOff = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+		sTOff = new screenTurnOff();
+		registerReceiver(sTOff, filterOff);
+
 		getCamera();
 		// keepRunning = true;
 		super.onCreate();
@@ -59,6 +61,7 @@ public class TorchActivityService extends IntentService {
 
 	@Override
 	public void onDestroy() {
+		this.unregisterReceiver(sTOff);
 		stopFlash();
 		releaseCamera();
 		super.onDestroy();
@@ -99,47 +102,22 @@ public class TorchActivityService extends IntentService {
 		TorchFragment.serviceCount--;
 	}
 
-	/**
-	 * public void strobe(){ while (TorchActivity.keepRunning){ startFlash(); stopFlash(); } }
-	 **/
-
 	public void lightOn() {
-		// loop through checking if the screen has been turned off
+		startFlash();
 		while (TorchActivity.keepRunning) {
-			// build the torch here with the values above
-			startFlash();
-			while (screenOn) {
-				if (!TorchActivity.keepRunning)
-					break;
-				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-				if (!powerManager.isScreenOn() && (powerManager.isScreenOn() != screenOn)) {
-					// checks to see if the user wants the light left on when the screen is turned off
-					if (sOLOff) {
-						screenOn = false;
-						stopFlash();
-						// sleep to let the camera be turned off properly
-						// without this the light didn't always come back on
-						try {
-							Thread.sleep(200);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						startFlash();
-					} else {
-						TorchActivity.keepRunning = false;
-//***********************Need to close the Notification down from here somehow******************
-					}
-				}
-			}
-			while (!screenOn) {
-				if (!TorchActivity.keepRunning)
-					break;
-				powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-				if (powerManager.isScreenOn() && (powerManager.isScreenOn() != screenOn)) {
-					screenOn = true;
-				}
-			}
+			//Keeping onHandleIntent alive until it's no longer needed.
 		}
+	}
+
+	public void restartTorch() {
+		stopFlash();
+		// sleep to let the camera be turned off properly without this the light didn't always come back on
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		startFlash();
 	}
 
 	public void sosLoop(int times) {
@@ -198,10 +176,20 @@ public class TorchActivityService extends IntentService {
 		loopXTimes = Integer.valueOf(prefs.getString("loopxtimes", "1"));
 		sosSpeed = Integer.valueOf(prefs.getString("sosspeed", "500"));
 		timeBetweenSignals = Integer.valueOf(prefs.getString("timebetweenloops", "5"));
-		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity", "1000000"));
-		batteryPct = Integer.valueOf(prefs.getString("batterypct", "50"));
 		sOLOff = prefs.getBoolean("screenofflightoff", true);
+	}
 
+	public class screenTurnOff extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if(sOLOff){
+				if(click.equals("on")){
+					restartTorch();
+				}
+			}else{
+				TorchActivity.keepRunning = false;
+			}
+		}
 	}
 
 	// get camera parameters
@@ -238,7 +226,7 @@ public class TorchActivityService extends IntentService {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
 			}
 		});
 	}

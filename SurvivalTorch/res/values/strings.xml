@@ -18,29 +18,35 @@
     
     <string name="autoontitle">Auto-On</string>
     <string name="autoonsummary">Turns the main torch on as soon as you open the app</string>
-    <string name="timertitle">Timer</string>
-    <string name="timersummary">Turn off in x minutes</string>
-    <string name="timerdialogtitle">Turn the torch off in x minutes time:</string>
-    <string name="loopxtimestitle">Loop x</string>
-    <string name="loopxtimessummary">Send the SOS x times</string>
-    <string name="sosspeedtitle">Speed</string>
-    <string name="sosspeedsummary">Fast or slow SOS signals</string>
-    <string name="timebetweensostitle">Frequency</string>
-    <string name="timelbetweensossummary">Repeat the SOS every x seconds</string>
-    <string name="lightsensitivitytitle">Daylight</string>
-    <string name="lightsensitivitysummary">Stop sending the SOS as it gets light</string>
-    <string name="lightsensitivitydialogtitle">Sensitivity of the light sensor in LUX</string>
-    <string name="batterypercent">Stop sending SOS when battery reaches:</string>
-    <string name="batterypercentsummary">Stop sending SOS on low battery</string>
-    <string name="batterypercenttitle">Low Battery</string>
+    <string name="screenofflightofftitle">Imortal Torch</string>
+    <string name="screenofflightoffsummary">Leave the torch on when the screen turns off</string>
     <string name="keepscreenontitle">Awake</string>
     <string name="keepscreenonsummary">Keep the screen on</string>
     
-    <string name="nsoundtitle">Alerts</string>
-    <string name="nsoundsummary">Notification sound when the torch is non-manually turned off (Low battery, Daylight or Timer)?</string>
-    <string name="screenofflightofftitle">Imortal Torch</string>
-    <string name="screenofflightoffsummary">Leave the torch on when the screen turns off</string>
+    <string name="prefkeytimer">Timer</string>
+    <string name="timerontitle">Timer</string>
+    <string name="timeronsummary">Automatically turns the Survival torch off</string>
+    <string name="timertitle">Time limit</string>
+    <string name="timersummary">Turn off after x minutes</string>
+    <string name="timerdialogtitle">Turn the torch off in x minutes</string>
+    
+    <string name="loopxtimestitle">Loop x</string>
+    <string name="loopxtimessummary">Send the SOS x times</string>
+    <string name="timebetweensostitle">Frequency</string>
+    <string name="timelbetweensossummary">Repeat the SOS every x seconds</string>
+    <string name="sosspeedtitle">Speed</string>
+    <string name="sosspeedsummary">Fast or slow SOS signals</string>
+    
+    <string name="lightsensitivitytitle">Daylight</string>
+    <string name="lightsensitivitysummary">Turns torch off when it gets light</string>
+    <string name="lightsensitivitydialogtitle">Sensitivity of the light sensor in LUX</string>
+    <string name="batterypercent">Stop sending SOS when battery reaches</string>
+    <string name="batterypercentsummary">Turns torch off on low battery</string>
+    <string name="batterypercenttitle">Low Battery</string>
+
     <string name="notificationstitle">Use Notifications</string>
     <string name="notificationssummary">Turn torch off from the notification bar</string>
+    <string name="nsoundtitle">Alerts</string>
+    <string name="nsoundsummary">Notification sound when the torch is non-manually turned off (Low battery, Daylight or Timer)?</string>
     
 </resources>

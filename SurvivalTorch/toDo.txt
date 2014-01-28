@@ -6,3 +6,5 @@ Set up a few broadcast senders and receivers to see exactly how they work
 Timer for the light
 
 Notification - Turn off from notification bar option?
+
+In preferences, instead of using x minutes etc use the actual number
