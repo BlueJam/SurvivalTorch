@@ -21,26 +21,26 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		TorchFragment.AlertResetListener, LightFragment.LightSensorListener, TorchFragment.ServiceListener,
 		BatteryFragment.AutoStopCleanup, LightFragment.AutoStopCleanup, TimerFragment.AutoStopCleanup {
 
-	boolean keepScreenOn = false;
+	private boolean keepScreenOn = false;
 	private TorchFragment torchFrag = null;
 	private LightFragment lightFrag = null;
 	private BatteryFragment batteryFrag = null;
 	private TimerFragment timerFrag = null;
 
 	private boolean soundAlert = false;
-	boolean closeEverything = false;
+	private boolean closeEverything = false;
 
 	public static boolean lightOn;
 	public static boolean keepRunning;
-	
-	public boolean timerOn;
 
-	SharedPreferences prefsEdit;
-	SharedPreferences prefs;
-	String activityRunning;
-	
+	private boolean timerOn;
+
+	private SharedPreferences prefsEdit;
+	private SharedPreferences prefs;
+
+	private boolean notifications;
 	private boolean nSound;
-	boolean autoOn;
+	private boolean autoOn;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -48,9 +48,10 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		setContentView(R.layout.main);
 
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean activityCheck = prefs.getBoolean("activityrunning", true);
+		//these two need to keep there state, the others need refreshing when the activity resumes
+		boolean activityRunning = prefs.getBoolean("activityrunning", true);
 		autoOn = prefs.getBoolean("autoon", false);
-		timerOn = prefs.getBoolean("timeron", false);
+		getPrefs();
 
 		// this means that the Notification has been clicked to stop the service it also closes this activity so the app
 		// is no longer running
@@ -60,15 +61,14 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 			if (closeEverything) {
 				keepRunning = false;
 				;
-				if (!activityCheck) {
+				if (!activityRunning) {
 					finish();
 				}
 			}
 			// makes sure the torch only gets turned on the first time the activity is created
 			autoOn = false;
 		}
-
-		keepScreenOn = Boolean.valueOf(prefs.getBoolean("keepscreenon", false));
+		
 		if (keepScreenOn) {
 			// stops main screen closing
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -91,8 +91,7 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 			batteryFrag = new BatteryFragment();
 			getSupportFragmentManager().beginTransaction().add(R.id.batteryfrag, batteryFrag).commit();
 		}
-		
-		
+
 		timerFrag = (TimerFragment) getSupportFragmentManager().findFragmentById(R.id.timerfrag);
 		if (timerFrag == null) {
 			timerFrag = new TimerFragment();
@@ -101,8 +100,6 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 
 		// the TorchActivity is running!!!
 		prefsEdit = PreferenceManager.getDefaultSharedPreferences(this);
-		activityOpen(true);
-		
 	}
 
 	@Override
@@ -119,13 +116,13 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 
 	@Override
 	public void onResume() {
-		nSound = prefs.getBoolean("nsound", false);
-		timerOn = prefs.getBoolean("timeron", false);
+		getPrefs();
 		super.onResume();
-		activityOpen(true);
 	}
 
-	public void activityOpen(boolean b) {
+	// Tracks if the activity was most recently open or closed, this is used when the notification strip is touched to
+	// see if it leaves the activity open or calls finish() on it.
+	private void activityOpen(boolean b) {
 		prefsEdit.edit().putBoolean("activityrunning", b).commit();
 	}
 
@@ -140,7 +137,7 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		switch (item.getItemId()) {
 		case R.id.prefs:
 			Intent i = new Intent(this, Preferences.class);
-			i.putExtra("lightSensor", torchFrag.isThereALightSensor);
+			i.putExtra("lightSensor", torchFrag.getIsThereALightSensor());
 			startActivity(i);
 			return (true);
 		}
@@ -149,7 +146,7 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 
 	@Override
 	public void onlightChanged(float lux, int lightSensitivity) {
-		torchFrag.message.setText("LUX = " + Float.toString(lux));
+		torchFrag.setMessage(lux);
 	}
 
 	@Override
@@ -162,18 +159,18 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		enableScreenTimeout();
 	}
 
-	public void playNotification() {
-		if(nSound){
-		Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-		if (soundAlert) {
-			Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-			r.play();
-			soundAlert = false;
+	private void playNotification() {
+		if (nSound) {
+			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+			if (soundAlert) {
+				Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+				r.play();
+				soundAlert = false;
 			}
 		}
 	}
 
-	public void enableScreenTimeout() {
+	private void enableScreenTimeout() {
 		if (keepScreenOn) {
 			getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 			keepScreenOn = false;
@@ -187,12 +184,12 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 
 	@Override
 	public void lightSensorCheck(boolean isThereALightSensor) {
-		torchFrag.isThereALightSensor = isThereALightSensor;
+		torchFrag.setIsThereALightSensor(isThereALightSensor);
 	}
 
 	@Override
 	public void startService(String s) {
-		stopService();
+		stopNotification();
 		startTimer();
 		Intent i = new Intent(this, TorchActivityService.class);
 		Bundle extras = new Bundle();
@@ -201,36 +198,31 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		i.putExtras(extras);
 		this.startService(i);
 	}
-	
-	private void startTimer(){
-		if(timerOn){
+
+	private void startTimer() {
+		if (timerOn) {
 			timerFrag.setTimerGoing();
 		}
 	}
 
 	@Override
-	public void stopService() {
-		CancelNotification(this, TorchActivityService.NOTIFY_ID);
+	public void stopNotification() {
+		if(notifications){
+			CancelNotification(this, TorchActivityService.NOTIFY_ID);
+		}
 	}
 
-	public void CancelNotification(Context ctx, int notifyId) {
+	private void CancelNotification(Context ctx, int notifyId) {
 		String ns = Context.NOTIFICATION_SERVICE;
 		NotificationManager nMgr = (NotificationManager) ctx.getSystemService(ns);
 		nMgr.cancel(notifyId);
 	}
-
-	@Override
-	public void onPause() {
-		super.onPause();
-		// toast("pause");
-		activityOpen(true);
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
-		// toast("stop");
-		activityOpen(true);
+	
+	private void getPrefs(){
+		nSound = prefs.getBoolean("nsound", false);
+		timerOn = prefs.getBoolean("timeron", false);
+		keepScreenOn = prefs.getBoolean("keepscreenon", false);
+		notifications = prefs.getBoolean("notification", true);
 	}
 
 	@Override
@@ -238,11 +230,11 @@ public class TorchActivity extends SherlockFragmentActivity implements LightFrag
 		super.onDestroy();
 		// toast("destroy");
 		activityOpen(false);
-		CancelNotification(this, TorchActivityService.NOTIFY_ID);
+		stopNotification();
 	}
-	
+
 	public void toast(String s) {
 		Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
 	}
-	
+
 }

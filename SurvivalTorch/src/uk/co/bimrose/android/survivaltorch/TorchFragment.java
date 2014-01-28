@@ -1,17 +1,11 @@
 package uk.co.bimrose.android.survivaltorch;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,32 +16,21 @@ import com.actionbarsherlock.app.SherlockFragment;
 
 public class TorchFragment extends SherlockFragment implements View.OnClickListener {
 
-	Button buttonFull;
-	Button buttonSos;
-	Button buttonSosPreset;
-	Button buttonStop;
-	TextView message;
-	TextView batteryMessage;
+	private Button buttonFull;
+	private Button buttonSos;
+	private Button buttonSosPreset;
+	private Button buttonStop;
+	private TextView message;
 
-	Camera cam = null;
-	Parameters p = null;
-	boolean isFlashOn = false;
-	boolean single = true;
-	int lightSensitivity = 1000000;
-	int timeBetweenSignals = 5;
-	boolean keepScreenOn = false;
-	int batteryPct = 50;
-	int loopXTimes = 1;
-	int sosSpeed = 500;
-	boolean isThereALightSensor;
-	boolean running = false;
+	private int lightSensitivity = 1000000;
+	private boolean isThereALightSensor;
 	
-	SharedPreferences prefs;
+	private SharedPreferences prefs;
 
 	public static int serviceCount;
 
-	AlertResetListener alertResetListener;
-	ServiceListener sListener;
+	private AlertResetListener alertResetListener;
+	private ServiceListener sListener;
 
 	int x;
 
@@ -80,7 +63,6 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 		buttonSosPreset = (Button) result.findViewById(R.id.button_sos_preset);
 		buttonStop = (Button) result.findViewById(R.id.button_stop);
 		message = (TextView) result.findViewById(R.id.message);
-		batteryMessage = (TextView) result.findViewById(R.id.batterymessage);
 
 		buttonFull.setOnClickListener(this);
 		buttonSos.setOnClickListener(this);
@@ -114,7 +96,7 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 			sListener.startService("sosPreset");
 			break;
 		case R.id.button_stop:
-			sListener.stopService();
+			sListener.stopNotification();
 			break;
 		default:
 			throw new RuntimeException("Unknown button ID");
@@ -123,9 +105,6 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 
 	private void getPreferences() {
 		prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		loopXTimes = Integer.valueOf(prefs.getString("loopxtimes", "1"));
-		timeBetweenSignals = Integer.valueOf(prefs.getString("timebetweenloops", "5"));
-		sosSpeed = Integer.valueOf(prefs.getString("sosspeed", "500"));
 		lightSensitivity = Integer.valueOf(prefs.getString("lightsensitivity", "1000000"));
 		message.setText("");
 		if (lightSensitivity < 1000) {
@@ -134,9 +113,20 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 				prefs.edit().remove("lightSensitivity").commit();
 			}
 		}
-		batteryPct = Integer.valueOf(prefs.getString("batterypct", "50"));
 	}
-
+	
+	public void setMessage(float lux){
+		message.setText("LUX = " + Float.toString(lux));
+	}
+	
+	public void setIsThereALightSensor(boolean isThereALightSensor){
+		this.isThereALightSensor = isThereALightSensor;
+	}
+	
+	public boolean getIsThereALightSensor(){
+		return isThereALightSensor;
+	}
+	
 	// Container Activity must implement this interface
 	public interface AlertResetListener {
 		public void alertReset();
@@ -146,6 +136,6 @@ public class TorchFragment extends SherlockFragment implements View.OnClickListe
 	public interface ServiceListener {
 		public void startService(String s);
 
-		public void stopService();
+		public void stopNotification();
 	}
 }

@@ -1,8 +1,6 @@
 keeps running even when the screen is off
 For cameras where this doesn't work, a super low screen brightness option?
 
-Set up a few broadcast senders and receivers to see exactly how they work
-
 Timer for the light
 Indicate if it is on!
 Timer countdown shown on screen, good solution

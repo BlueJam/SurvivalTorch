@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
-import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -20,28 +19,23 @@ import android.widget.Toast;
 
 public class TorchActivityService extends IntentService {
 
-	NotificationCompat.Builder b;
-	NotificationManager mgr;
-
 	public static int NOTIFY_ID = 1337;
 
-	Camera cam = null;
-	Parameters p = null;
-	PowerManager powerManager;
+	private Camera cam = null;
+	private Parameters p = null;
 
-	boolean screenOn = true;
+	private int loopXTimes;
+	private int sosSpeed;
+	private int timeBetweenSignals;
+	private boolean sOLOff;
+	private boolean notifications;
 
-	int loopXTimes;
-	int sosSpeed;
-	int timeBetweenSignals;
-	boolean sOLOff;
-
-	String click;
-	SharedPreferences prefs;
+	private String click;
+	private SharedPreferences prefs;
 
 	private Handler handler;
 
-	screenTurnOff sTOff;
+	private screenTurnOff sTOff;
 
 	public TorchActivityService() {
 		super("TorchActivityService");
@@ -89,7 +83,10 @@ public class TorchActivityService extends IntentService {
 
 		getPreferences();
 		stopFlash();
-		raiseNotification();
+		
+		if(notifications){
+			raiseNotification();
+		}
 
 		// how did we get here? button clicks.
 		if (click.equals("on")) {
@@ -102,14 +99,14 @@ public class TorchActivityService extends IntentService {
 		TorchFragment.serviceCount--;
 	}
 
-	public void lightOn() {
+	private void lightOn() {
 		startFlash();
 		while (TorchActivity.keepRunning) {
 			//Keeping onHandleIntent alive until it's no longer needed.
 		}
 	}
 
-	public void restartTorch() {
+	private void restartTorch() {
 		stopFlash();
 		// sleep to let the camera be turned off properly without this the light didn't always come back on
 		try {
@@ -120,7 +117,7 @@ public class TorchActivityService extends IntentService {
 		startFlash();
 	}
 
-	public void sosLoop(int times) {
+	private void sosLoop(int times) {
 		for (int x = 0; x < times; x++) {
 			if (!TorchActivity.keepRunning)
 				break;
@@ -170,13 +167,14 @@ public class TorchActivityService extends IntentService {
 		mgr.notify(NOTIFY_ID, b.build());
 	}
 
-	public void getPreferences() {
+	private void getPreferences() {
 		Context ctx = getApplicationContext();
 		prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 		loopXTimes = Integer.valueOf(prefs.getString("loopxtimes", "1"));
 		sosSpeed = Integer.valueOf(prefs.getString("sosspeed", "500"));
 		timeBetweenSignals = Integer.valueOf(prefs.getString("timebetweenloops", "5"));
 		sOLOff = prefs.getBoolean("screenofflightoff", true);
+		notifications = prefs.getBoolean("notifications", true);
 	}
 
 	public class screenTurnOff extends BroadcastReceiver {
@@ -185,6 +183,7 @@ public class TorchActivityService extends IntentService {
 			if(sOLOff){
 				if(click.equals("on")){
 					restartTorch();
+					//don't need to do anything to keep sos going
 				}
 			}else{
 				TorchActivity.keepRunning = false;
@@ -203,7 +202,7 @@ public class TorchActivityService extends IntentService {
 		cam = null;
 	}
 
-	public void startFlash() {
+	private void startFlash() {
 		if (!TorchActivity.lightOn) {
 			p.setFlashMode(Parameters.FLASH_MODE_TORCH);
 			cam.setParameters(p);
@@ -212,7 +211,7 @@ public class TorchActivityService extends IntentService {
 		}
 	}
 
-	public void stopFlash() {
+	private void stopFlash() {
 		if (TorchActivity.lightOn) {
 			p.setFlashMode(Parameters.FLASH_MODE_OFF);
 			cam.setParameters(p);

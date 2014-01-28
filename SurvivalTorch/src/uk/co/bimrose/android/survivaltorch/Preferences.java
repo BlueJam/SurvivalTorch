@@ -1,12 +1,15 @@
 package uk.co.bimrose.android.survivaltorch;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceScreen;
 
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
 
-public class Preferences extends SherlockPreferenceActivity {
+public class Preferences extends SherlockPreferenceActivity implements OnPreferenceChangeListener {
 
 	boolean lightSensor;
 	PreferenceScreen preferenceScreen;
@@ -14,7 +17,6 @@ public class Preferences extends SherlockPreferenceActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		addPreferencesFromResource(R.xml.preferences);
 
 		// used to save the state of the TorchActivity for the notification
@@ -42,14 +44,23 @@ public class Preferences extends SherlockPreferenceActivity {
 
 	}
 
+	@Override
+	public boolean onPreferenceChange(Preference preference, Object newValue) {
+		Preference pref = findPreference("timer");
+		if (pref instanceof ListPreference) {
+	        ListPreference listPref = (ListPreference) pref;
+	        pref.setSummary("test");
+	    }
+		return false;
+	}
+
 	/**
 	 * @SuppressWarnings("deprecation")
-	 * @Override public void onCreate(Bundle savedInstanceState) {
-	 *           super.onCreate(savedInstanceState); if (Build.VERSION.SDK_INT <
-	 *           Build.VERSION_CODES.HONEYCOMB) {
+	 * @Override public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); if
+	 *           (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
 	 *           addPreferencesFromResource(R.xml.pref_display); } }
 	 * @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	 * @Override public void onBuildHeaders(List<Header> target) {
-	 *           loadHeadersFromResource(R.xml.preference_headers, target); }
+	 * @Override public void onBuildHeaders(List<Header> target) { loadHeadersFromResource(R.xml.preference_headers,
+	 *           target); }
 	 **/
 }

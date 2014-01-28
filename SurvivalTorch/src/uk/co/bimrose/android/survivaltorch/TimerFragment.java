@@ -33,9 +33,8 @@ public class TimerFragment extends SherlockFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View result = inflater.inflate(R.layout.timerfrag, parent, false);
 		getPreferences();
-		return (result);
+		return (null);
 	}
 
 	@Override
@@ -44,12 +43,6 @@ public class TimerFragment extends SherlockFragment {
 		// gets the timer time onResume in case the user has changed it in preferences
 		getPreferences();
 	}
-
-	/**
-	 * public void setTimerGoing() { new Timer().schedule(new TimerTask() {
-	 * 
-	 * @Override public void run() { autoStopCleanup.autoStopCleanup(); } }, timer * 10000); }
-	 **/
 
 	public void setTimerGoing() {
 		final Handler handler = new Handler();

@@ -27,13 +27,13 @@
     <string name="timerontitle">Timer</string>
     <string name="timeronsummary">Automatically turns the Survival torch off</string>
     <string name="timertitle">Time limit</string>
-    <string name="timersummary">Turn off after x minutes</string>
+    <string name="timersummary">Turn off after %s minutes</string>
     <string name="timerdialogtitle">Turn the torch off in x minutes</string>
     
     <string name="loopxtimestitle">Loop x</string>
-    <string name="loopxtimessummary">Send the SOS x times</string>
+    <string name="loopxtimessummary">Send the SOS %s times</string>
     <string name="timebetweensostitle">Frequency</string>
-    <string name="timelbetweensossummary">Repeat the SOS every x seconds</string>
+    <string name="timelbetweensossummary">Repeat the SOS every %s seconds</string>
     <string name="sosspeedtitle">Speed</string>
     <string name="sosspeedsummary">Fast or slow SOS signals</string>
     
